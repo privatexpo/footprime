@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Choisir une place — Prime Football</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=73" />
+</head>
+<body>
+  <a class="skip-link" href="#place-main">Aller au contenu</a>
+
+  <header class="main-nav">
+    <div class="shell main-nav__inner">
+      <button type="button" class="icon-btn main-nav__menu" id="nav-menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-nav">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+
+      <a class="logo" href="index.html" aria-label="Prime Football">
+        <span class="logo__text">
+          <span>Prime</span>
+          <span>Football</span>
+        </span>
+      </a>
+
+      <nav class="main-nav__links" aria-label="Navigation principale">
+        <a href="index.html#matchs">Matchs</a>
+        <a class="is-active" href="index.html#matchs">Billetterie</a>
+      </nav>
+
+      <div class="main-nav__actions">
+        <button type="button" class="btn-outline" id="cart-btn">
+          <span class="btn-outline__label">Panier</span> <span id="cart-count">0</span>
+        </button>
+        <a class="main-nav__signin" href="index.html">Retour</a>
+      </div>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" hidden>
+      <a href="index.html">Retour</a>
+    </nav>
+  </header>
+
+  <main id="place-main" class="place-page">
+    <div class="shell place-page__inner">
+      <a class="place-back" href="index.html#matchs">← Retour aux matchs</a>
+
+      <div class="place-layout" id="place-layout">
+        <div class="place-aside">
+          <aside class="place-card" id="place-card" aria-label="Match">
+            <div class="place-card__split" id="place-match"></div>
+            <div class="place-card__body" id="place-meta" hidden>
+              <p class="place-card__comp" id="place-eyebrow"></p>
+              <p class="place-card__when"><span id="place-meta-date"></span></p>
+              <p class="place-card__venue" id="place-meta-venue"></p>
+            </div>
+          </aside>
+        </div>
+
+        <section class="place-cats" aria-labelledby="place-title">
+          <h1 id="place-title">Catégories</h1>
+
+          <fieldset class="fff-cats" id="fff-cats">
+            <legend class="sr-only">Catégories de places</legend>
+          </fieldset>
+
+          <div class="place-footer-bar">
+            <div class="qty qty--page">
+              <label for="qty">Quantité</label>
+              <div class="qty__controls">
+                <button type="button" id="qty-minus" aria-label="Diminuer">−</button>
+                <input id="qty" type="number" min="1" max="8" value="1" readonly />
+                <button type="button" id="qty-plus" aria-label="Augmenter">+</button>
+              </div>
+            </div>
+            <div class="place-summary">
+              <p class="place-summary__total">Total&nbsp;: <strong id="ticket-total">0,00 €</strong></p>
+              <button type="button" class="btn-primary" id="add-to-cart">Ajouter au panier</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <dialog class="dialog" id="cart-dialog" aria-labelledby="cart-dialog-title">
+    <div class="dialog__panel">
+      <button type="button" class="dialog__close" id="cart-close" aria-label="Fermer">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3l8 8M11 3L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h2 id="cart-dialog-title">Ton panier</h2>
+      <ul class="cart-list" id="cart-list"></ul>
+      <div class="dialog__footer">
+        <p>Total <strong id="cart-total">0 €</strong></p>
+        <button type="button" class="btn-primary" id="checkout-btn">Valider la commande</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <script src="data.js?v=50"></script>
+  <script src="place.js?v=32"></script>
+</body>
+</html>
