@@ -1,4 +1,4 @@
-import { ShopError, lireCommande } from "../lib/shop.js";
+import { ShopError, lireCommande, livrerTest } from "../lib/shop.js";
 
 function reponse(body, status = 200) {
   return {
@@ -14,6 +14,7 @@ export async function handler(event) {
   try {
     const result = await lireCommande(params.commande, params.key);
     if (!result.paid && !result.order.test) return reponse({ paid: false, ref: result.order.ref });
+    if (result.order.test) await livrerTest(result.order.wooId).catch(() => {});
     return reponse({ paid: true, order: result.order });
   } catch (error) {
     const status = error instanceof ShopError ? error.status : 500;

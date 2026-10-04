@@ -57,7 +57,7 @@
         return false;
       }
       lead.textContent = payload.order.test
-        ? "Paiement test confirmé. Scanne le QR. Le PDF part par e-mail."
+        ? "Paiement test confirmé. La facture et les e-billets partent par e-mail. Scanne le QR."
         : "Paiement confirmé. Tes e-billets partent aussi par e-mail.";
       root.innerHTML = orderBlock(payload.order);
       viderPanier();

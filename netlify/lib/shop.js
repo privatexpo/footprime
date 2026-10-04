@@ -341,6 +341,23 @@ export async function lireCommande(code, key) {
   return { order, paid: payee(wcOrder), status: wcOrder.status };
 }
 
+export async function livrerTest(wooId) {
+  const wcOrder = await wc(`/orders/${wooId}`);
+  const order = commandeDepuis(wcOrder);
+  if (!order?.test || !order.email) return;
+  if (meta(wcOrder.meta_data, "_pf_mail_brevo") === "oui") return;
+  await envoyerMails(order);
+  await wc(`/orders/${wcOrder.id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      meta_data: [
+        { key: "_pf_mail_brevo", value: "oui" },
+        { key: "_pf_mail_brevo_date", value: new Date().toISOString() },
+      ],
+    }),
+  });
+}
+
 export async function retrouver(email, code) {
   const mail = String(email || "").trim().toLowerCase();
   const parsed = idDeRef(code);
@@ -487,16 +504,29 @@ async function envoyerMails(order) {
     await envoyerBrevo({
       to: order.email,
       from: "Prime Football <facturation@primeworldtickets.com>",
-      subject: `Billet test ${ticket.code}`,
+      subject: `Facture ${order.ref}`,
       html: htmlMail({
-        kicker: "Test",
-        title: "Ton billet test",
-        intro: `Bonjour ${esc(order.name)}, le paiement test de 1 € est confirmé. Le QR est dans le PDF joint. Tu peux aussi l'ouvrir ici : <a href="${esc(url)}">${esc(ticket.code)}</a>.`,
-        rows: `<p style="margin:0;"><strong>${esc(ticket.code)}</strong><br>Billet test · TEST · 1 €</p>`,
+        kicker: "Facture",
+        title: "Ta facture",
+        intro: `Bonjour ${esc(order.name)}, le paiement test est confirmé. Total TTC <strong>1 €</strong>. Tes e-billets partent dans un second e-mail.`,
+        rows: `<p style="margin:0;"><strong>${esc(item.title)}</strong><br>TEST · 1 €</p>`,
+        footer: "Prime Football · primeworldtickets.com",
+      }),
+      key: `pf-${order.wooId}-facture`,
+    });
+    await envoyerBrevo({
+      to: order.email,
+      from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
+      subject: `E-billets ${order.ref}`,
+      html: htmlMail({
+        kicker: "E-billets",
+        title: "Tes e-billets",
+        intro: `Bonjour ${esc(order.name)}, voici ton code <strong>${esc(order.ref)}</strong>. Le QR est dans le PDF joint. Tu peux aussi l'ouvrir ici : <a href="${esc(url)}">${esc(ticket.code)}</a>.`,
+        rows: `<p style="margin:0 0 14px;"><strong>${esc(ticket.code)}</strong><br>${esc(item.title)} · TEST<br>Rang ${ticket.row} · Place ${ticket.seat}</p>`,
         footer: "Billet de test. Aucune place n'est vendue.",
       }),
       attachment: [{ name: `${ticket.code}.pdf`, content: pdf.toString("base64") }],
-      key: `pf-${order.wooId}-test`,
+      key: `pf-${order.wooId}-billets`,
     });
     return;
   }
