@@ -79,6 +79,11 @@ const els = {
   meta: document.getElementById("place-meta"),
   metaDate: document.getElementById("place-meta-date"),
   metaVenue: document.getElementById("place-meta-venue"),
+  metaCity: document.getElementById("place-meta-city"),
+  cityFact: document.getElementById("place-city-fact"),
+  picked: document.getElementById("place-selected-cat"),
+  also: document.getElementById("place-also"),
+  alsoScroller: document.getElementById("place-also-scroller"),
   cats: document.getElementById("fff-cats"),
   total: document.getElementById("ticket-total"),
   qtyInput: document.getElementById("qty"),
@@ -177,6 +182,97 @@ function renderCategories(from) {
   });
 }
 
+function esc(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/"/g, "&quot;");
+}
+
+function competitionOf(id) {
+  for (const competition of Object.values(COMPETITIONS)) {
+    for (const week of competition.weeks) {
+      for (const day of week.days) {
+        if (day.matches.some((entry) => entry.id === id)) return competition;
+      }
+    }
+  }
+  return null;
+}
+
+function relatedMatches(id) {
+  const rows = [];
+  let currentComp = "";
+  for (const competition of Object.values(COMPETITIONS)) {
+    for (const week of competition.weeks) {
+      for (const day of week.days) {
+        for (const match of day.matches) {
+          if (match.id === id) {
+            currentComp = competition.id;
+            continue;
+          }
+          if (match.status === "sold") continue;
+          rows.push({
+            match,
+            date: day.date,
+            competition,
+            stadium: stadiumFor(match.homeShort),
+          });
+        }
+      }
+    }
+  }
+  const same = rows.filter((row) => row.competition.id === currentComp);
+  const other = rows.filter((row) => row.competition.id !== currentComp);
+  return same.concat(other).slice(0, 14);
+}
+
+function renderAlso() {
+  if (!els.also || !els.alsoScroller) return;
+  if (!found || found.match.status === "sold") {
+    els.also.hidden = true;
+    return;
+  }
+  const rows = relatedMatches(found.match.id);
+  if (!rows.length) {
+    els.also.hidden = true;
+    return;
+  }
+  els.also.hidden = false;
+  els.alsoScroller.innerHTML = rows
+    .map((row) => {
+      const { match, date, competition, stadium } = row;
+      const venue = [stadium?.name, stadium?.city].filter(Boolean).join(" · ");
+      return `
+        <a class="rec-card" href="place.html?id=${encodeURIComponent(match.id)}">
+          <span class="rec-card__split">
+            <span class="rec-card__side" style="--side:${esc(match.homeColor)}"><img src="${esc(match.homeLogo)}" alt="" width="64" height="64" /></span>
+            <span class="rec-card__vs" aria-hidden="true">VS</span>
+            <span class="rec-card__side" style="--side:${esc(match.awayColor)}"><img src="${esc(match.awayLogo)}" alt="" width="64" height="64" /></span>
+          </span>
+          <span class="rec-card__body">
+            <span class="rec-card__comp">${esc(competition.shortName || competition.name)}</span>
+            <span class="rec-card__teams">${esc(match.home)} — ${esc(match.away)}</span>
+            <span class="rec-card__when">${esc(pfDate(date))} · ${esc(match.kickoff)}</span>
+            <span class="rec-card__venue">${esc(venue)}</span>
+            <span class="rec-card__price">${t("match.from", { price: Number(match.from) || 20 })}</span>
+          </span>
+        </a>`;
+    })
+    .join("");
+  requestAnimationFrame(syncAlsoNav);
+}
+
+function syncAlsoNav() {
+  const scroller = els.alsoScroller;
+  const prev = document.getElementById("place-also-prev");
+  const next = document.getElementById("place-also-next");
+  if (!scroller || !prev || !next) return;
+  const max = scroller.scrollWidth - scroller.clientWidth;
+  prev.disabled = scroller.scrollLeft <= 4;
+  next.disabled = max <= 4 || scroller.scrollLeft >= max - 4;
+}
+
 function renderPlace() {
   if (!found || found.match.status === "sold") {
     if (els.meta) els.meta.hidden = false;
@@ -185,6 +281,7 @@ function renderPlace() {
       els.match.innerHTML = `<div class="place-card__empty"><h2>${t("place.gone")}</h2><a href="index.html#matchs">${t("nav.backMatches")}</a></div>`;
     }
     document.querySelector(".place-cats")?.remove();
+    if (els.also) els.also.hidden = true;
     return;
   }
 
@@ -193,17 +290,24 @@ function renderPlace() {
 
   const homeInk = inkFor(match.homeColor, match.inkHome);
   const awayInk = inkFor(match.awayColor);
+  const page = document.querySelector(".place-page");
+  if (page) {
+    page.style.setProperty("--home", match.homeColor || "#37003c");
+    page.style.setProperty("--away", match.awayColor || "#37003c");
+  }
+  const comp = competitionOf(match.id);
 
   if (els.meta) els.meta.hidden = false;
-  if (els.eyebrow) els.eyebrow.textContent = `${competition} · ${pfWeek(week)}`;
-  if (els.metaDate) {
-    const when = pfDate(date);
-    els.metaDate.textContent = stadium?.name ? `${when} · ${stadium.name}` : when;
+  if (els.eyebrow) {
+    const logo = comp?.logo
+      ? `<img src="${esc(comp.logo)}" alt="" width="28" height="28" />`
+      : "";
+    els.eyebrow.innerHTML = `${logo}<span>${esc(competition)} · ${esc(pfWeek(week))}</span>`;
   }
-  if (els.metaVenue) {
-    els.metaVenue.textContent = stadium?.city || "";
-    els.metaVenue.hidden = !stadium?.city;
-  }
+  if (els.metaDate) els.metaDate.textContent = pfDate(date);
+  if (els.metaVenue) els.metaVenue.textContent = stadium?.name || "";
+  if (els.metaCity) els.metaCity.textContent = stadium?.city || "";
+  if (els.cityFact) els.cityFact.hidden = !stadium?.city;
 
   if (els.match) {
     els.match.innerHTML = `
@@ -220,6 +324,7 @@ function renderPlace() {
   }
 
   renderCategories(match.from);
+  renderAlso();
   updateTotal();
 }
 
@@ -237,6 +342,11 @@ function updateTotal() {
   if (els.qtyInput) els.qtyInput.value = String(qty);
   const note = document.getElementById("place-together");
   if (note) note.textContent = qty > 1 ? t("place.togetherNow", { n: qty }) : t("place.together");
+  if (els.picked) {
+    const id = document.querySelector('input[name="category"]:checked')?.value;
+    const def = CATEGORY_DEFS.find((c) => c.id === id);
+    els.picked.textContent = def ? t("place.picked", { n: def.num }) : "";
+  }
 }
 
 document.getElementById("qty-minus")?.addEventListener("click", () => {
@@ -279,6 +389,60 @@ document.getElementById("add-to-cart")?.addEventListener("click", () => {
 
 bindCartUI();
 updateTotal();
+
+document.getElementById("place-also-prev")?.addEventListener("click", () => scrollAlso(-1));
+document.getElementById("place-also-next")?.addEventListener("click", () => scrollAlso(1));
+els.alsoScroller?.addEventListener("scroll", syncAlsoNav, { passive: true });
+window.addEventListener("resize", syncAlsoNav);
+
+function scrollAlso(dir) {
+  const scroller = els.alsoScroller;
+  if (!scroller) return;
+  const card = scroller.querySelector(".rec-card");
+  const step = (card ? card.getBoundingClientRect().width : 280) + 14;
+  scroller.scrollBy({ left: dir * step, behavior: "smooth" });
+}
+
+(function dragAlso() {
+  const scroller = els.alsoScroller;
+  if (!scroller) return;
+  let startX = 0;
+  let startScroll = 0;
+  let dragging = false;
+  let moved = 0;
+
+  scroller.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    dragging = true;
+    moved = 0;
+    startX = event.clientX;
+    startScroll = scroller.scrollLeft;
+    scroller.classList.add("is-dragging");
+    scroller.setPointerCapture(event.pointerId);
+  });
+  scroller.addEventListener("pointermove", (event) => {
+    if (!dragging) return;
+    const dx = event.clientX - startX;
+    moved = Math.abs(dx);
+    scroller.scrollLeft = startScroll - dx;
+  });
+  const end = () => {
+    dragging = false;
+    scroller.classList.remove("is-dragging");
+  };
+  scroller.addEventListener("pointerup", end);
+  scroller.addEventListener("pointercancel", end);
+  scroller.addEventListener(
+    "click",
+    (event) => {
+      if (moved < 8) return;
+      event.preventDefault();
+      event.stopPropagation();
+      moved = 0;
+    },
+    true
+  );
+})();
 
 (function setupMobileNav() {
   const nav = document.querySelector(".main-nav");
