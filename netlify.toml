@@ -4,6 +4,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  included_files = ["index.html"]
 
 [[redirects]]
   from = "/api/commande"
@@ -54,615 +55,615 @@
 
 [[redirects]]
   from = "/champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/champions/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/champions-league"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/champions-league/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/championsleague"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/champions league"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Champions-League"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Champions League"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/premier/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/premier-league"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/premier-league/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/premierleague"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/premier league"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Premier-League"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Premier league"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/Premier League"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/fr"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/fr/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/fr-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/fr-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/en"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/en/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/en-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/en-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/es"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/es/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/es-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/es-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/de"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/de/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/de-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/de-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/it"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/it/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/it-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/it-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/pt"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/pt/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/pt-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/pt-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nl"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nl/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nl-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nl-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/english"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/english/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/english-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/english-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/anglais"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/anglais/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/anglais-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/anglais-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/french"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/french/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/french-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/french-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/francais"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/francais/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/francais-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/francais-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espanol"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espanol/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espanol-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espanol-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espagnol"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espagnol/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espagnol-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/espagnol-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/spanish"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/spanish/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/spanish-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/spanish-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/deutsch"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/deutsch/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/deutsch-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/deutsch-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/allemand"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/allemand/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/allemand-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/allemand-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/german"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/german/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/german-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/german-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italiano"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italiano/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italiano-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italiano-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italien"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italien/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italien-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italien-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italian"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italian/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italian-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/italian-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugues"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugues/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugues-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugues-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugais"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugais/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugais-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portugais-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portuguese"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portuguese/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portuguese-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/portuguese-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nederlands"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nederlands/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nederlands-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/nederlands-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/neerlandais"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/neerlandais/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/neerlandais-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/neerlandais-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/dutch"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/dutch/"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/dutch-champions"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
 
 [[redirects]]
   from = "/dutch-premier"
-  to = "/index.html"
+  to = "/.netlify/functions/landing"
   status = 200
