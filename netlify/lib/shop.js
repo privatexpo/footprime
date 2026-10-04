@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { deflateSync } from "node:zlib";
 import qrcode from "../../qrcode.js";
 
 const SITE = "https://primeworldtickets.com";
@@ -498,9 +499,6 @@ function htmlMail({ kicker, title, intro, rows, footer }) {
 async function envoyerMails(order) {
   if (order.test) {
     const item = order.items[0];
-    const ticket = item.tickets[0];
-    const url = ticketUrl(order, item, ticket);
-    const pdf = pdfBillet(order, item, ticket, url);
     await envoyerBrevo({
       to: order.email,
       from: "Prime Football <facturation@primeworldtickets.com>",
@@ -514,6 +512,7 @@ async function envoyerMails(order) {
       }),
       key: `pf-${order.wooId}-facture`,
     });
+    const billets = dossierBillets(order);
     await envoyerBrevo({
       to: order.email,
       from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
@@ -521,11 +520,11 @@ async function envoyerMails(order) {
       html: htmlMail({
         kicker: "E-billets",
         title: "Tes e-billets",
-        intro: `Bonjour ${esc(order.name)}, voici ton code <strong>${esc(order.ref)}</strong>. Le QR est dans le PDF joint. Tu peux aussi l'ouvrir ici : <a href="${esc(url)}">${esc(ticket.code)}</a>.`,
-        rows: `<p style="margin:0 0 14px;"><strong>${esc(ticket.code)}</strong><br>${esc(item.title)} · TEST<br>Rang ${ticket.row} · Place ${ticket.seat}</p>`,
+        intro: `Bonjour ${esc(order.name)}, le paiement test est confirmé.`,
+        rows: billets.rows,
         footer: "Billet de test. Aucune place n'est vendue.",
       }),
-      attachment: [{ name: `${ticket.code}.pdf`, content: pdf.toString("base64") }],
+      attachment: billets.fichiers,
       key: `pf-${order.wooId}-billets`,
     });
     return;
@@ -549,16 +548,7 @@ async function envoyerMails(order) {
     }),
     key: `pf-${order.wooId}-facture`,
   });
-  const billets = order.items
-    .map((item) =>
-      item.tickets
-        .map((ticket) => {
-          const url = ticketUrl(order, item, ticket);
-          return `<p style="margin:0 0 14px;"><strong>${esc(ticket.code)}</strong><br>${esc(item.title)} · ${esc(item.category)}<br>Rang ${ticket.row} · Place ${ticket.seat}<br><a href="${esc(url)}">Ouvrir le e-billet</a></p>`;
-        })
-        .join("")
-    )
-    .join("");
+  const billets = dossierBillets(order);
   await envoyerBrevo({
     to: order.email,
     from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
@@ -566,12 +556,34 @@ async function envoyerMails(order) {
     html: htmlMail({
       kicker: "E-billets",
       title: "Tes e-billets",
-      intro: `Bonjour ${esc(order.name)}, voici ton code <strong>${esc(order.ref)}</strong>. Avec l'e-mail de la commande, il permet de retrouver tes billets.`,
-      rows: billets,
-      footer: "Présente chaque billet à l'entrée du stade.",
+      intro: `Bonjour ${esc(order.name)}.`,
+      rows: billets.rows,
+      footer: "Présente chaque QR code à l'entrée du stade.",
     }),
+    attachment: billets.fichiers,
     key: `pf-${order.wooId}-billets`,
   });
+}
+
+function dossierBillets(order) {
+  const fichiers = [];
+  const cartes = [];
+  for (const item of order.items) {
+    for (const ticket of item.tickets || []) {
+      const url = ticketUrl(order, item, ticket);
+      const d = new URL(url).searchParams.get("d");
+      fichiers.push({ name: `${ticket.code}.pdf`, content: pdfBillet(order, item, ticket, url).toString("base64") });
+      cartes.push(`<p style="margin:16px 0 8px;"><img src="${SITE}/api/qr?d=${encodeURIComponent(d)}" width="220" height="220" alt="QR code" style="display:block;"></p>
+        <p style="margin:0 0 8px;"><strong>${esc(ticket.code)}</strong><br>${esc(item.title)} · Rang ${ticket.row} · Place ${ticket.seat}<br>PDF joint : ${esc(ticket.code)}.pdf</p>`);
+    }
+  }
+  return {
+    fichiers,
+    rows: `<p style="margin:0 0 4px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#5c5360;">Code pour retrouver tes billets</p>
+      <p style="margin:0 0 6px;font-size:28px;font-weight:800;letter-spacing:1px;">${esc(order.ref)}</p>
+      <p style="margin:0;">Entre ce code avec l'e-mail de la commande.</p>
+      ${cartes.join("")}`,
+  };
 }
 
 function qrModules(text) {
@@ -600,8 +612,8 @@ function pdfText(value) {
   return out;
 }
 
-export function pdfBillet(order, item, ticket, url) {
-  const matrix = qrModules(url);
+function qrPixels(text) {
+  const matrix = qrModules(text);
   const scale = 6;
   const quiet = 4;
   const modules = matrix.length;
@@ -619,15 +631,58 @@ export function pdfBillet(order, item, ticket, url) {
       }
     }
   }
+  return { pixels, dim };
+}
+
+function crc32(buf) {
+  let c = ~0;
+  for (const byte of buf) {
+    c ^= byte;
+    for (let i = 0; i < 8; i += 1) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+  }
+  return ~c >>> 0;
+}
+
+function pngChunk(type, data) {
+  const body = Buffer.concat([Buffer.from(type), data]);
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(body));
+  return Buffer.concat([len, body, crc]);
+}
+
+export function pngQr(text) {
+  const { pixels, dim } = qrPixels(text);
+  const raw = Buffer.alloc((dim + 1) * dim);
+  for (let y = 0; y < dim; y += 1) {
+    pixels.copy(raw, y * (dim + 1) + 1, y * dim, (y + 1) * dim);
+  }
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(dim, 0);
+  ihdr.writeUInt32BE(dim, 4);
+  ihdr[8] = 8;
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    pngChunk("IHDR", ihdr),
+    pngChunk("IDAT", deflateSync(raw)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+export function pdfBillet(order, item, ticket, url) {
+  const { pixels, dim } = qrPixels(url);
+  const test = item.competition === "TEST";
   const lines = [
-    "BILLET TEST",
+    test ? "BILLET TEST" : "E-BILLET",
     "Prime Football",
+    `Code ${order.ref}`,
     ticket.code,
     item.title,
-    "Rang 1 · Place 1",
-    "TEST · 1 EUR",
-    "Scan de controle. Aucune place vendue.",
-  ];
+    `Rang ${ticket.row} · Place ${ticket.seat}`,
+    test ? "TEST · 1 EUR" : item.category || "",
+    test ? "Scan de controle. Aucune place vendue." : item.stadium || "",
+  ].filter(Boolean);
   const imgSize = 240;
   const draw = [
     `q ${imgSize} 0 0 ${imgSize} 90 340 cm /Im1 Do Q`,
