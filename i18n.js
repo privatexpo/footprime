@@ -10,6 +10,67 @@
     { id: "nl", label: "Nederlands" },
   ];
 
+  const LANG_WORDS = {
+    fr: "fr",
+    francais: "fr",
+    french: "fr",
+    en: "en",
+    english: "en",
+    anglais: "en",
+    es: "es",
+    espanol: "es",
+    spanish: "es",
+    espagnol: "es",
+    de: "de",
+    deutsch: "de",
+    german: "de",
+    allemand: "de",
+    it: "it",
+    italiano: "it",
+    italian: "it",
+    italien: "it",
+    pt: "pt",
+    portugues: "pt",
+    portuguese: "pt",
+    portugais: "pt",
+    nl: "nl",
+    nederlands: "nl",
+    dutch: "nl",
+    neerlandais: "nl",
+  };
+
+  function motLangue(value) {
+    const key = String(value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    return LANG_WORDS[key] || "";
+  }
+
+  function langueDepuisUrl() {
+    const path = decodeURIComponent(window.location.pathname || "");
+    for (const part of path.split(/[/\s-]+/)) {
+      const lang = motLangue(part);
+      if (lang) return lang;
+    }
+    return motLangue(new URLSearchParams(window.location.search).get("lang"));
+  }
+
+  function cheminAvecLangue(id) {
+    const parts = decodeURIComponent(window.location.pathname || "").split("/").filter(Boolean);
+    if (parts.length > 1) return "";
+    if (!parts.length || parts[0] === "index.html") return `/${id}`;
+    const bits = parts[0].split("-");
+    const index = bits.findIndex((bit) => motLangue(bit));
+    if (index >= 0) {
+      bits[index] = id;
+      return `/${bits.join("-")}`;
+    }
+    const brut = parts[0].toLowerCase();
+    if (brut.includes("premier") || brut.includes("champions")) return `/${id}-${parts[0]}`;
+    return "";
+  }
+
   const FLAGS = {
     fr: `<svg viewBox="0 0 60 40" aria-hidden="true"><rect width="20" height="40" fill="#0055a4"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#ef4135"/></svg>`,
     en: `<svg viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#c8102e" stroke-width="4"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="14"/><path d="M30 0v40M0 20h60" stroke="#c8102e" stroke-width="8"/></svg>`,
@@ -758,12 +819,16 @@
     document.querySelectorAll(".lang-btn").forEach((btn) => btn.setAttribute("aria-expanded", "false"));
   }
 
-  function setLang(id) {
+  function setLang(id, options) {
     current = LANGS.some((l) => l.id === id) ? id : "fr";
     try {
       localStorage.setItem(KEY, current);
     } catch (e) {
       /* ignore */
+    }
+    if (!options?.silent) {
+      const next = cheminAvecLangue(current);
+      if (next && next !== window.location.pathname) history.pushState({ lang: current }, "", next);
     }
     applyStatic();
     paint();
@@ -804,17 +869,32 @@
     applyStatic();
   }
 
-  try {
-    const saved = localStorage.getItem(KEY);
-    if (saved && LANGS.some((l) => l.id === saved)) current = saved;
-  } catch (e) {
-    /* ignore */
+  const langueUrl = langueDepuisUrl();
+  if (langueUrl) {
+    current = langueUrl;
+    try {
+      localStorage.setItem(KEY, current);
+    } catch (e) {
+      /* ignore */
+    }
+  } else {
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved && LANGS.some((l) => l.id === saved)) current = saved;
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   window.t = t;
   window.pfDate = pfDate;
   window.pfWeek = pfWeek;
   window.pfLang = () => current;
+
+  window.addEventListener("popstate", () => {
+    const depuisUrl = langueDepuisUrl();
+    if (depuisUrl && depuisUrl !== current) setLang(depuisUrl, { silent: true });
+  });
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mount);

@@ -116,3 +116,523 @@
   from = "/Premier League"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/fr"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/fr/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/fr-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/fr-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/en"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/en-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/en-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/es"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/es/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/es-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/es-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/de"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/de/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/de-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/de-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/it"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/it/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/it-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/it-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/pt"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/pt/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/pt-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/pt-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nl"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nl/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nl-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nl-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/english"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/english/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/english-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/english-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/anglais"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/anglais/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/anglais-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/anglais-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/french"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/french/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/french-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/french-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/francais"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/francais/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/francais-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/francais-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espanol"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espanol/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espanol-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espanol-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espagnol"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espagnol/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espagnol-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/espagnol-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/spanish"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/spanish/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/spanish-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/spanish-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/deutsch"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/deutsch/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/deutsch-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/deutsch-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/allemand"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/allemand/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/allemand-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/allemand-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/german"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/german/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/german-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/german-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italiano"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italiano/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italiano-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italiano-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italien"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italien/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italien-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italien-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italian"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italian/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italian-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/italian-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugues"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugues/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugues-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugues-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugais"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugais/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugais-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portugais-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portuguese"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portuguese/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portuguese-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portuguese-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nederlands"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nederlands/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nederlands-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nederlands-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/neerlandais"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/neerlandais/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/neerlandais-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/neerlandais-premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dutch"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dutch/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dutch-champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dutch-premier-league"
+  to = "/index.html"
+  status = 200
