@@ -725,7 +725,7 @@ document.getElementById("filters-reset").addEventListener("click", () => {
 document.querySelectorAll(".sub-tabs__tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     const id = tab.dataset.competition;
-    const comp = id === "pl" ? "premier-league" : "champions-league";
+    const comp = id === "pl" ? "premier" : "champions";
     const lang = typeof pfLang === "function" ? pfLang() : "fr";
     const ici = decodeURIComponent(window.location.pathname || "").toLowerCase();
     const avecLangue = lang && lang !== "fr" || /(?:^|\/|-)(en|es|de|it|pt|nl|english|anglais|espanol|deutsch|italiano|portugues|nederlands)(?:-|$)/.test(ici);

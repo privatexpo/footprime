@@ -53,6 +53,21 @@
   force = true
 
 [[redirects]]
+  from = "/champions"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/champions/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Champions"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
   from = "/champions-league"
   to = "/index.html"
   status = 200
@@ -79,6 +94,21 @@
 
 [[redirects]]
   from = "/Champions League"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/premier"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/premier/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Premier"
   to = "/index.html"
   status = 200
 
@@ -128,12 +158,12 @@
   status = 200
 
 [[redirects]]
-  from = "/fr-champions-league"
+  from = "/fr-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/fr-premier-league"
+  from = "/fr-premier"
   to = "/index.html"
   status = 200
 
@@ -148,12 +178,12 @@
   status = 200
 
 [[redirects]]
-  from = "/en-champions-league"
+  from = "/en-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/en-premier-league"
+  from = "/en-premier"
   to = "/index.html"
   status = 200
 
@@ -168,12 +198,12 @@
   status = 200
 
 [[redirects]]
-  from = "/es-champions-league"
+  from = "/es-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/es-premier-league"
+  from = "/es-premier"
   to = "/index.html"
   status = 200
 
@@ -188,12 +218,12 @@
   status = 200
 
 [[redirects]]
-  from = "/de-champions-league"
+  from = "/de-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/de-premier-league"
+  from = "/de-premier"
   to = "/index.html"
   status = 200
 
@@ -208,12 +238,12 @@
   status = 200
 
 [[redirects]]
-  from = "/it-champions-league"
+  from = "/it-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/it-premier-league"
+  from = "/it-premier"
   to = "/index.html"
   status = 200
 
@@ -228,12 +258,12 @@
   status = 200
 
 [[redirects]]
-  from = "/pt-champions-league"
+  from = "/pt-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/pt-premier-league"
+  from = "/pt-premier"
   to = "/index.html"
   status = 200
 
@@ -248,12 +278,12 @@
   status = 200
 
 [[redirects]]
-  from = "/nl-champions-league"
+  from = "/nl-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/nl-premier-league"
+  from = "/nl-premier"
   to = "/index.html"
   status = 200
 
@@ -268,12 +298,12 @@
   status = 200
 
 [[redirects]]
-  from = "/english-champions-league"
+  from = "/english-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/english-premier-league"
+  from = "/english-premier"
   to = "/index.html"
   status = 200
 
@@ -288,12 +318,12 @@
   status = 200
 
 [[redirects]]
-  from = "/anglais-champions-league"
+  from = "/anglais-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/anglais-premier-league"
+  from = "/anglais-premier"
   to = "/index.html"
   status = 200
 
@@ -308,12 +338,12 @@
   status = 200
 
 [[redirects]]
-  from = "/french-champions-league"
+  from = "/french-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/french-premier-league"
+  from = "/french-premier"
   to = "/index.html"
   status = 200
 
@@ -328,12 +358,12 @@
   status = 200
 
 [[redirects]]
-  from = "/francais-champions-league"
+  from = "/francais-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/francais-premier-league"
+  from = "/francais-premier"
   to = "/index.html"
   status = 200
 
@@ -348,12 +378,12 @@
   status = 200
 
 [[redirects]]
-  from = "/espanol-champions-league"
+  from = "/espanol-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/espanol-premier-league"
+  from = "/espanol-premier"
   to = "/index.html"
   status = 200
 
@@ -368,12 +398,12 @@
   status = 200
 
 [[redirects]]
-  from = "/espagnol-champions-league"
+  from = "/espagnol-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/espagnol-premier-league"
+  from = "/espagnol-premier"
   to = "/index.html"
   status = 200
 
@@ -388,12 +418,12 @@
   status = 200
 
 [[redirects]]
-  from = "/spanish-champions-league"
+  from = "/spanish-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/spanish-premier-league"
+  from = "/spanish-premier"
   to = "/index.html"
   status = 200
 
@@ -408,12 +438,12 @@
   status = 200
 
 [[redirects]]
-  from = "/deutsch-champions-league"
+  from = "/deutsch-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/deutsch-premier-league"
+  from = "/deutsch-premier"
   to = "/index.html"
   status = 200
 
@@ -428,12 +458,12 @@
   status = 200
 
 [[redirects]]
-  from = "/allemand-champions-league"
+  from = "/allemand-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/allemand-premier-league"
+  from = "/allemand-premier"
   to = "/index.html"
   status = 200
 
@@ -448,12 +478,12 @@
   status = 200
 
 [[redirects]]
-  from = "/german-champions-league"
+  from = "/german-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/german-premier-league"
+  from = "/german-premier"
   to = "/index.html"
   status = 200
 
@@ -468,12 +498,12 @@
   status = 200
 
 [[redirects]]
-  from = "/italiano-champions-league"
+  from = "/italiano-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/italiano-premier-league"
+  from = "/italiano-premier"
   to = "/index.html"
   status = 200
 
@@ -488,12 +518,12 @@
   status = 200
 
 [[redirects]]
-  from = "/italien-champions-league"
+  from = "/italien-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/italien-premier-league"
+  from = "/italien-premier"
   to = "/index.html"
   status = 200
 
@@ -508,12 +538,12 @@
   status = 200
 
 [[redirects]]
-  from = "/italian-champions-league"
+  from = "/italian-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/italian-premier-league"
+  from = "/italian-premier"
   to = "/index.html"
   status = 200
 
@@ -528,12 +558,12 @@
   status = 200
 
 [[redirects]]
-  from = "/portugues-champions-league"
+  from = "/portugues-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/portugues-premier-league"
+  from = "/portugues-premier"
   to = "/index.html"
   status = 200
 
@@ -548,12 +578,12 @@
   status = 200
 
 [[redirects]]
-  from = "/portugais-champions-league"
+  from = "/portugais-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/portugais-premier-league"
+  from = "/portugais-premier"
   to = "/index.html"
   status = 200
 
@@ -568,12 +598,12 @@
   status = 200
 
 [[redirects]]
-  from = "/portuguese-champions-league"
+  from = "/portuguese-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/portuguese-premier-league"
+  from = "/portuguese-premier"
   to = "/index.html"
   status = 200
 
@@ -588,12 +618,12 @@
   status = 200
 
 [[redirects]]
-  from = "/nederlands-champions-league"
+  from = "/nederlands-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/nederlands-premier-league"
+  from = "/nederlands-premier"
   to = "/index.html"
   status = 200
 
@@ -608,12 +638,12 @@
   status = 200
 
 [[redirects]]
-  from = "/neerlandais-champions-league"
+  from = "/neerlandais-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/neerlandais-premier-league"
+  from = "/neerlandais-premier"
   to = "/index.html"
   status = 200
 
@@ -628,11 +658,11 @@
   status = 200
 
 [[redirects]]
-  from = "/dutch-champions-league"
+  from = "/dutch-champions"
   to = "/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dutch-premier-league"
+  from = "/dutch-premier"
   to = "/index.html"
   status = 200
