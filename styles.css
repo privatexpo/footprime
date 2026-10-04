@@ -2230,7 +2230,7 @@ body:not([data-competition]) .match-card__comp-logo {
 
 .place-also__head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 0.85rem;
@@ -2242,13 +2242,6 @@ body:not([data-competition]) .match-card__comp-logo {
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-}
-
-.place-also__lead {
-  margin: 0.2rem 0 0;
-  color: #6b7280;
-  font-size: 0.92rem;
-  font-weight: 600;
 }
 
 .place-also__nav {
