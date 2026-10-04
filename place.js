@@ -244,7 +244,7 @@ function renderAlso() {
       const { match, date, competition, stadium } = row;
       const venue = [stadium?.name, stadium?.city].filter(Boolean).join(" · ");
       return `
-        <a class="rec-card" href="place.html?id=${encodeURIComponent(match.id)}">
+        <a class="rec-card" style="--i:${rows.indexOf(row)}" href="place.html?id=${encodeURIComponent(match.id)}">
           <span class="rec-card__split">
             <span class="rec-card__side" style="--side:${esc(match.homeColor)}"><img src="${esc(match.homeLogo)}" alt="" width="64" height="64" /></span>
             <span class="rec-card__vs" aria-hidden="true">VS</span>
@@ -303,6 +303,12 @@ function renderPlace() {
   if (els.metaVenue) els.metaVenue.textContent = stadium?.name || "";
   if (els.metaCity) els.metaCity.textContent = stadium?.city || "";
   if (els.cityFact) els.cityFact.hidden = !stadium?.city;
+  const hot = document.getElementById("place-hot");
+  if (hot) {
+    const show = match.status === "hot";
+    hot.hidden = !show;
+    hot.textContent = show ? t("match.demand") : "";
+  }
 
   if (els.match) {
     els.match.innerHTML = `
@@ -331,17 +337,48 @@ function selectedPrice() {
   return Number(checked?.dataset.price || 0);
 }
 
+function selectedCategory() {
+  const id = document.querySelector('input[name="category"]:checked')?.value;
+  return CATEGORY_DEFS.find((c) => c.id === id) || null;
+}
+
+function syncPitch(def) {
+  const pitch = document.getElementById("place-pitch");
+  const label = document.getElementById("place-pitch-label");
+  if (!pitch || !def) return;
+  pitch.style.setProperty("--zone", def.color);
+  pitch.querySelectorAll("[data-seat]").forEach((zone) => {
+    zone.classList.toggle("is-on", zone.dataset.seat === def.seat);
+  });
+  if (label) {
+    const next = `${t(def.descKey)} · ${t("view." + def.view)} · ${def.covered ? t("place.covered") : t("place.open")}`;
+    if (label.textContent !== next) {
+      label.textContent = next;
+      label.classList.remove("is-tick");
+      void label.offsetWidth;
+      label.classList.add("is-tick");
+    }
+  }
+}
+
 function updateTotal() {
   if (!els.total) return;
-  els.total.textContent = euro(selectedPrice() * qty);
+  const price = selectedPrice();
+  const next = euro(price * qty);
+  if (els.total.textContent !== next) {
+    els.total.textContent = next;
+    els.total.classList.remove("is-tick");
+    void els.total.offsetWidth;
+    els.total.classList.add("is-tick");
+  }
   if (els.qtyInput) els.qtyInput.value = String(qty);
   const note = document.getElementById("place-together");
   if (note) note.textContent = qty > 1 ? t("place.togetherNow", { n: qty }) : t("place.together");
-  if (els.picked) {
-    const id = document.querySelector('input[name="category"]:checked')?.value;
-    const def = CATEGORY_DEFS.find((c) => c.id === id);
-    els.picked.textContent = def ? t("place.picked", { n: def.num }) : "";
-  }
+  const def = selectedCategory();
+  if (els.picked) els.picked.textContent = def ? t("place.picked", { n: def.num }) : "";
+  const unit = document.getElementById("place-unit");
+  if (unit) unit.textContent = def ? `${euro(price)} × ${qty}` : "";
+  syncPitch(def);
 }
 
 document.getElementById("qty-minus")?.addEventListener("click", () => {

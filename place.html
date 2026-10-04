@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=113" />
+  <link rel="stylesheet" href="styles.css?v=114" />
 </head>
 <body>
   <a class="skip-link" href="#place-main" data-i18n="nav.skipPlace">Aller au contenu</a>
@@ -60,6 +60,7 @@
             <div class="place-card__split" id="place-match"></div>
             <div class="place-card__body" id="place-meta" hidden>
               <p class="place-card__comp" id="place-eyebrow"></p>
+              <p class="place-hot" id="place-hot" hidden></p>
               <ul class="place-facts">
                 <li>
                   <span class="place-facts__k" data-i18n="place.when">Date</span>
@@ -80,6 +81,30 @@
 
         <section class="place-cats" aria-labelledby="place-title">
           <h1 id="place-title" data-i18n="place.cats">Catégories</h1>
+          <div class="place-pitch" id="place-pitch">
+            <svg class="pitch" viewBox="0 0 240 140" aria-hidden="true">
+              <rect class="pitch__grass" x="1" y="1" width="238" height="138" rx="16" />
+              <g class="pitch__zones">
+                <g data-seat="corners"><rect x="16" y="16" width="28" height="24" rx="4" /><rect x="196" y="16" width="28" height="24" rx="4" /><rect x="16" y="100" width="28" height="24" rx="4" /><rect x="196" y="100" width="28" height="24" rx="4" /></g>
+                <g data-seat="goals"><rect x="16" y="44" width="24" height="52" rx="4" /><rect x="200" y="44" width="24" height="52" rx="4" /></g>
+                <g data-seat="upper"><rect x="48" y="16" width="144" height="16" rx="4" /><rect x="48" y="108" width="144" height="16" rx="4" /></g>
+                <g data-seat="side"><rect x="54" y="34" width="132" height="14" rx="4" /><rect x="54" y="92" width="132" height="14" rx="4" /></g>
+                <g data-seat="pitch"><rect x="66" y="50" width="108" height="12" rx="4" /><rect x="66" y="78" width="108" height="12" rx="4" /></g>
+              </g>
+              <g class="pitch__lines" fill="none" stroke="#fff" stroke-width="1.5">
+                <rect x="16" y="16" width="208" height="108" rx="2" />
+                <line x1="120" y1="16" x2="120" y2="124" />
+                <circle cx="120" cy="70" r="16" />
+                <circle cx="120" cy="70" r="1.8" fill="#fff" stroke="none" />
+                <rect x="16" y="46" width="26" height="48" />
+                <rect x="198" y="46" width="26" height="48" />
+              </g>
+            </svg>
+            <p class="place-pitch__copy">
+              <span class="place-pitch__k" data-i18n="place.zone">Ta place</span>
+              <span class="place-pitch__label" id="place-pitch-label"></span>
+            </p>
+          </div>
           <ul class="place-perks">
             <li>
               <span class="place-perks__icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.2 2.2h4.2v4.2H2.2zM9.6 2.2h4.2v4.2H9.6zM2.2 9.6h4.2v4.2H2.2z" stroke="currentColor" stroke-width="1.4"/><path d="M9.8 9.8h1.6v1.6H9.8zM12.4 9.8H14v1.6h-1.6zM9.8 12.4h1.6V14H9.8zM12.4 12.4H14V14h-1.6z" fill="currentColor"/></svg></span>
@@ -111,6 +136,7 @@
             <div class="place-summary">
               <div class="place-summary__text">
                 <p class="place-summary__cat" id="place-selected-cat"></p>
+                <p class="place-summary__unit" id="place-unit"></p>
                 <p class="place-summary__total"><span data-i18n="place.total">Total</span> <strong id="ticket-total">0,00 €</strong></p>
               </div>
               <button type="button" class="btn-primary" id="add-to-cart" data-i18n="place.add">Ajouter au panier</button>
@@ -154,8 +180,8 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-  <script src="i18n.js?v=13"></script>
+  <script src="i18n.js?v=14"></script>
   <script src="data.js?v=61"></script>
-  <script src="place.js?v=44"></script>
+  <script src="place.js?v=45"></script>
 </body>
 </html>
