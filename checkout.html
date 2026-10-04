@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Commande — Prime Football</title>
+  <link rel="canonical" href="https://www.primeworldtickets.com/checkout.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=107" />
+</head>
+<body>
+  <div id="chrome-top"></div>
+  <main id="page-main" class="page-doc">
+    <div class="shell">
+      <article class="legal-content">
+        <p class="legal-content__eyebrow">Prime Football</p>
+        <h1 data-i18n="checkout.title">Tes coordonnées</h1>
+        <p class="legal-content__lead" data-i18n="checkout.lead">Les e-billets sont associés à ton e-mail.</p>
+        <div id="checkout-empty" hidden>
+          <p data-i18n="checkout.empty">Ton panier est vide.</p>
+          <p><a href="index.html#matchs" data-i18n="nav.backMatches">← Retour aux matchs</a></p>
+        </div>
+        <div id="checkout-ready">
+          <ul class="cart-list" id="checkout-lines"></ul>
+          <p class="checkout-total"><span data-i18n="place.total">Total</span> <strong id="checkout-total">0 €</strong></p>
+          <form class="contact-form" id="checkout-form">
+            <label><span data-i18n="checkout.name">Nom</span><input name="name" required autocomplete="name" /></label>
+            <label><span data-i18n="checkout.email">E-mail</span><input type="email" name="email" required autocomplete="email" /></label>
+            <button type="submit" class="btn-primary" data-i18n="checkout.submit">Recevoir mes e-billets</button>
+          </form>
+        </div>
+      </article>
+    </div>
+  </main>
+  <div id="chrome-bottom"></div>
+  <script src="i18n.js?v=8"></script>
+  <script src="data.js?v=56"></script>
+  <script src="tickets.js?v=4"></script>
+  <script src="orders-ui.js?v=5"></script>
+  <script src="chrome.js?v=2"></script>
+</body>
+</html>

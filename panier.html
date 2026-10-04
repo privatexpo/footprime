@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Panier — Prime Football</title>
+  <link rel="canonical" href="https://www.primeworldtickets.com/panier.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=107" />
+</head>
+<body>
+  <div id="chrome-top"></div>
+  <main id="page-main" class="page-doc">
+    <div class="shell">
+      <article class="legal-content cart-page">
+        <header class="cart-head">
+          <h1>
+            <svg class="cart-head__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.5 5h2.2l1.7 9.2h10.4l1.6-6.4H7.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="10" cy="18.2" r="1.35" fill="currentColor"/>
+              <circle cx="16.6" cy="18.2" r="1.35" fill="currentColor"/>
+            </svg>
+            <span data-i18n="cart.title">Ton panier</span>
+          </h1>
+          <p class="cart-hold" id="cart-hold" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 8v4.5l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span data-i18n="cart.hold">Tes places sont gardées encore</span>
+            <strong id="cart-hold-time">10:00</strong>
+          </p>
+        </header>
+        <div id="cart-empty" hidden>
+          <p class="legal-note" id="cart-expired" hidden data-i18n="cart.expired">Le délai de 10 minutes est écoulé. Tes places ont été libérées.</p>
+          <p class="legal-note" id="cart-empty-note" data-i18n="cart.empty">Ton panier est vide.</p>
+          <p><a href="index.html#matchs" data-i18n="nav.backMatches">← Retour aux matchs</a></p>
+        </div>
+        <div id="cart-ready">
+          <ul class="cart-list" id="cart-lines"></ul>
+          <div class="cart-summary">
+          <p class="checkout-total"><span data-i18n="place.total">Total</span> <strong id="cart-page-total">0 €</strong></p>
+          <a class="btn-primary" id="cart-checkout" href="checkout.html" data-i18n="cart.checkout">Valider la commande</a>
+          <p class="cart-legal">
+            <span data-i18n="cart.legalBefore">En payant, tu acceptes les</span>
+            <a href="cgv.html" data-i18n="cart.cgvLink">conditions générales de vente</a>
+            <span data-i18n="cart.legalMid">et la</span>
+            <a href="confidentialite.html" data-i18n="cart.privacyLink">politique de confidentialité</a>.
+          </p>
+          <div class="pay-marks">
+            <p data-i18n="cart.pay">Moyens de paiement</p>
+            <div class="pay-marks__row">
+              <svg class="pay-mark" viewBox="0 0 78 32" role="img" aria-label="Apple Pay"><rect width="78" height="32" rx="4" fill="#000"/><path fill="#fff" transform="translate(7 5.2) scale(0.62)" d="M18.7 7.3c-1 .1-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 2.9 1.1.1 2.2-.6 2.9-1.4.6-.8 1.1-1.9 1-3zM19 10.5c-1.6-.1-3 .9-3.8.9s-2-.9-3.3-.8c-1.7.1-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.3 2.6 1.3 0 1.8-.8 3.4-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.2-2.5.6-.9 1.1-1.8 1.4-2.8-3.7-1.4-4.3-6.6-.7-8.6-1.1-1.4-2.7-2.2-4-2.3z"/><text x="34" y="21" fill="#fff" font-size="14" font-family="Arial, Helvetica, sans-serif" font-weight="500">Pay</text></svg>
+              <svg class="pay-mark" viewBox="0 0 62 32" role="img" aria-label="Visa"><rect width="62" height="32" rx="4" fill="#1434CB"/><text x="31" y="21.5" text-anchor="middle" fill="#fff" font-size="16" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-weight="700" letter-spacing="1">VISA</text></svg>
+              <svg class="pay-mark" viewBox="0 0 48 32" role="img" aria-label="Mastercard"><rect width="48" height="32" rx="4" fill="#fff" stroke="#e5e7eb"/><circle cx="20" cy="16" r="8" fill="#EB001B"/><circle cx="28" cy="16" r="8" fill="#F79E1B"/><path fill="#FF5F00" d="M24 9.4a8 8 0 0 1 0 13.2 8 8 0 0 1 0-13.2z"/></svg>
+              <svg class="pay-mark" viewBox="0 0 62 32" role="img" aria-label="American Express"><rect width="62" height="32" rx="4" fill="#2E77BC"/><text x="31" y="13.5" text-anchor="middle" fill="#fff" font-size="6.4" font-family="Arial, Helvetica, sans-serif" font-weight="700" letter-spacing="0.4">AMERICAN</text><text x="31" y="22.5" text-anchor="middle" fill="#fff" font-size="6.4" font-family="Arial, Helvetica, sans-serif" font-weight="700" letter-spacing="0.4">EXPRESS</text></svg>
+            </div>
+          </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+  <div id="chrome-bottom"></div>
+  <script src="i18n.js?v=9"></script>
+  <script src="data.js?v=56"></script>
+  <script src="orders-ui.js?v=6"></script>
+  <script src="chrome.js?v=2"></script>
+</body>
+</html>

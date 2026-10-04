@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Cookies — Prime Football</title>
-  <link rel="canonical" href="https://www.primeworldtickets.com/cookies.html" />
+  <title>E-billets — Prime Football</title>
+  <link rel="canonical" href="https://www.primeworldtickets.com/commande.html" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -15,17 +15,19 @@
   <main id="page-main" class="page-doc">
     <div class="shell">
       <article class="legal-content">
-        <p class="legal-content__eyebrow">Légal</p>
-        <h1>Politique cookies</h1>
-        <p class="legal-content__lead">Ce qui est enregistré sur ton appareil pour faire fonctionner la billetterie.</p>
-        <div class="legal-section"><h2>Essentiels</h2><p>Panier, langue, et commandes (e-billets) — nécessaires pour acheter et retrouver tes billets sur cet appareil.</p></div>
-        <div class="legal-section"><h2>Autres</h2><p>Pas de publicité. Tu peux effacer ces données dans les réglages du navigateur.</p></div>
+        <p class="legal-content__eyebrow">Prime Football</p>
+        <h1 data-i18n="order.title">Tes e-billets</h1>
+        <p class="legal-content__lead" data-i18n="order.lead">Présente chaque QR code à l’entrée. Les places d’une même commande sont côte à côte.</p>
+        <div id="order-root"></div>
       </article>
     </div>
   </main>
   <div id="chrome-bottom"></div>
   <script src="i18n.js?v=8"></script>
   <script src="data.js?v=56"></script>
+  <script src="qrcode.js?v=1"></script>
+  <script src="tickets.js?v=4"></script>
+  <script src="orders-ui.js?v=5"></script>
   <script src="chrome.js?v=2"></script>
 </body>
 </html>

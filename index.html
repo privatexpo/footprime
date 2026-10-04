@@ -8,42 +8,52 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=73" />
+  <link rel="stylesheet" href="styles.css?v=107" />
 </head>
 <body data-competition="ucl">
-  <a class="skip-link" href="#matchs">Aller aux matchs</a>
+  <a class="skip-link" href="#matchs" data-i18n="nav.skip">Aller aux matchs</a>
 
   <header class="main-nav">
     <div class="shell main-nav__inner">
-      <button type="button" class="icon-btn main-nav__menu" id="nav-menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-nav">
+      <button type="button" class="icon-btn main-nav__menu" id="nav-menu-btn" data-i18n-aria="nav.menu" aria-label="Menu" aria-expanded="false" aria-controls="mobile-nav">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
 
       <a class="logo" href="#top" aria-label="Prime Football">
-        <span class="logo__text">
-          <span>Prime</span>
-          <span>Football</span>
-        </span>
+        <img class="logo__img" src="logos/prime-football.png" alt="" width="1000" height="293" />
       </a>
 
       <nav class="main-nav__links" aria-label="Navigation principale">
-        <a class="is-active" href="#matchs">Matchs</a>
-        <a href="#matchs">Billetterie</a>
+        <a class="is-active" href="#matchs" data-i18n="nav.matches">Matchs</a>
+        <a href="#matchs" data-i18n="nav.tickets">Billetterie</a>
       </nav>
 
       <div class="main-nav__actions">
-        <button type="button" class="icon-btn" aria-label="Rechercher">
+        <div class="lang" data-lang>
+          <button type="button" class="lang-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Français"></button>
+          <ul class="lang-menu" role="listbox" hidden></ul>
+        </div>
+        <button type="button" class="icon-btn" data-i18n-aria="nav.search" aria-label="Rechercher">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
         <button type="button" class="btn-outline" id="cart-btn">
-          <span class="btn-outline__label">Panier</span> <span id="cart-count">0</span>
+          <span class="btn-outline__label" data-i18n="nav.cart">Panier</span> <span id="cart-count">0</span>
         </button>
-        <a class="main-nav__signin" href="#">Connexion</a>
       </div>
     </div>
     <nav class="mobile-nav" id="mobile-nav" hidden>
-      <a href="#aide-contact">Contact</a>
-      <a href="#">Connexion</a>
+      <a href="#matchs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.5v3M16 3.5v3M4 9.5h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span data-i18n="nav.matches">Matchs</span>
+      </a>
+      <a href="billets.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5A2 2 0 0 1 6.5 6.5h11a2 2 0 0 1 2 2v1.8a1.7 1.7 0 0 0 0 3.4v1.8a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.8a1.7 1.7 0 0 0 0-3.4V8.5z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span data-i18n="footer.tickets">Mes billets</span>
+      </a>
+      <a href="contact.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 7.5 12 13l8-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i18n="nav.contact">Contact</span>
+      </a>
     </nav>
   </header>
 
@@ -78,9 +88,9 @@
       <div class="shell">
         <div class="filters" role="search">
           <button type="button" class="filter-trigger" data-filter="club" id="filter-club-btn" aria-haspopup="dialog">
-            <span id="filter-club-label">Clubs</span>
+            <span id="filter-club-label" data-i18n="filters.clubs">Clubs</span>
           </button>
-          <button type="button" class="filters__reset" id="filters-reset" aria-label="Reset">
+          <button type="button" class="filters__reset" id="filters-reset" data-i18n-aria="filters.reset" aria-label="Reset">
             <span class="filters__reset-icon" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M4.5 12a7.5 7.5 0 0 1 12.7-5.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
@@ -89,13 +99,13 @@
                 <path d="M6.5 20.2v-4.2H10.7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span class="filters__reset-label">Reset</span>
+            <span class="filters__reset-label" data-i18n="filters.reset">Reset</span>
           </button>
         </div>
 
         <div class="fixtures__swipe">
-          <div class="week-nav" role="group" aria-label="Sélection de semaine">
-            <button type="button" class="week-nav__btn" id="week-prev" aria-label="Semaine précédente">
+          <div class="week-nav" role="group" data-i18n-aria="nav.weeks" aria-label="Sélection de semaine">
+            <button type="button" class="week-nav__btn" id="week-prev" data-i18n-aria="nav.prev" aria-label="Semaine précédente">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6L9 12l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="week-nav__center">
@@ -106,7 +116,7 @@
                 </div>
               </div>
             </div>
-            <button type="button" class="week-nav__btn" id="week-next" aria-label="Semaine suivante">
+            <button type="button" class="week-nav__btn" id="week-next" data-i18n-aria="nav.next" aria-label="Semaine suivante">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
@@ -204,127 +214,43 @@
         </ul>
       </section>
 
-    <!-- AIDE_START -->
-    <section class="aide-section" id="aide" aria-label="Aide et informations">
-      <div class="legal-page__inner aide-section__inner">
-        <aside class="legal-nav" aria-label="Aide et infos">
-          <p class="legal-nav__label">Aide &amp; infos</p>
-          <button type="button" class="legal-nav__btn" data-aide="faq" aria-controls="aide-panel-faq">FAQ</button>
-          <button type="button" class="legal-nav__btn" data-aide="cgv" aria-controls="aide-panel-cgv">Conditions générales de vente</button>
-          <button type="button" class="legal-nav__btn" data-aide="mentions" aria-controls="aide-panel-mentions">Mentions légales</button>
-          <button type="button" class="legal-nav__btn" data-aide="privacy" aria-controls="aide-panel-privacy">Confidentialité</button>
-          <button type="button" class="legal-nav__btn" data-aide="cookies" aria-controls="aide-panel-cookies">Cookies</button>
-          <button type="button" class="legal-nav__btn" data-aide="about" aria-controls="aide-panel-about">À propos</button>
-          <button type="button" class="legal-nav__btn" data-aide="contact" aria-controls="aide-panel-contact">Contact</button>
-        </aside>
-        <div class="aide-panels" hidden>
-        <div class="legal-content aide-panel" id="aide-panel-faq" data-aide-panel="faq" hidden>
-<p class="legal-content__eyebrow">Aide</p>
-<h1>Questions fréquentes</h1>
-<p class="legal-content__lead">Tout ce qu’il faut savoir pour acheter, recevoir et utiliser tes billets de match.</p>
-<div class="faq-list">
-  <details class="faq-item" open><summary>Comment acheter un billet sur Prime Football&nbsp;?</summary><div class="faq-item__body"><p>Choisis une compétition, un match, une catégorie et le nombre de billets, puis valide ton panier. Un e-billet est envoyé par e-mail après paiement.</p></div></details>
-  <details class="faq-item"><summary>Quels matchs sont disponibles&nbsp;?</summary><div class="faq-item__body"><p>Premier League et UEFA Champions League. Les stocks évoluent&nbsp;: un match absent est complet ou retiré de la vente.</p></div></details>
-  <details class="faq-item"><summary>Comment fonctionne l’e-billet&nbsp;?</summary><div class="faq-item__body"><p>Billet numérique avec QR code unique, sur téléphone ou imprimé. Un billet ne peut être scanné qu’une fois.</p></div></details>
-  <details class="faq-item"><summary>Puis-je annuler ou me faire rembourser&nbsp;?</summary><div class="faq-item__body"><p>Pas de droit de rétractation sur les billets à date déterminée. Remboursement possible surtout en cas d’annulation officielle du match. Voir les conditions générales de vente.</p></div></details>
-  <details class="faq-item"><summary>Match reporté ou annulé&nbsp;?</summary><div class="faq-item__body"><p>Report&nbsp;: billet valable pour la nouvelle date. Annulation&nbsp;: options communiquées par e-mail.</p></div></details>
-  <details class="faq-item"><summary>Revente / transfert&nbsp;?</summary><div class="faq-item__body"><p>Souvent encadré ou interdit. Contacte le support avant toute revente pour éviter une invalidation.</p></div></details>
-  <details class="faq-item"><summary>Catégories de places&nbsp;?</summary><div class="faq-item__body"><p>CAT 1, CAT 2… selon proximité et visibilité. Les prix varient selon le stade et la demande.</p></div></details>
-  <details class="faq-item"><summary>Enfants / âge minimum&nbsp;?</summary><div class="faq-item__body"><p>Un enfant a en général besoin de son propre billet. Règles selon le stade.</p></div></details>
-  <details class="faq-item"><summary>Moyens de paiement&nbsp;?</summary><div class="faq-item__body"><p>Carte bancaire, parfois Apple Pay / Google Pay. Prix en euros TTC.</p></div></details>
-  <details class="faq-item"><summary>Je n’ai pas reçu mon billet</summary><div class="faq-item__body"><p>Vérifie les spams. Sinon onglet Contact avec ton n° de commande.</p></div></details>
-  <details class="faq-item"><summary>Jour du match</summary><div class="faq-item__body"><p>E-billet, pièce d’identité si nominatif, respect du règlement du stade. Arrive en avance.</p></div></details>
-  <details class="faq-item"><summary>Places côte à côte&nbsp;?</summary><div class="faq-item__body"><p>On privilégie les places jointes, sans garantie absolue si le stock est fragmenté.</p></div></details>
-  <details class="faq-item"><summary>Service client</summary><div class="faq-item__body"><p>Onglet Contact. Urgent si match &lt; 48&nbsp;h.</p></div></details>
-</div>
-        </div>
-        <div class="legal-content aide-panel" id="aide-panel-cgv" data-aide-panel="cgv" hidden>
-<p class="legal-content__eyebrow">Légal</p>
-<h1>Conditions générales de vente</h1>
-<p class="legal-content__lead">Les règles applicables à l’achat de billets sur Prime Football.</p>
-<p class="legal-meta">Dernière mise à jour&nbsp;: 3 octobre 2026</p>
-<div class="legal-section"><h2>1. Objet</h2><p>Les conditions générales de vente régissent la vente de billets sportifs sur Prime Football.</p></div>
-<div class="legal-section"><h2>2. Éditeur</h2><p>Service exploité par Prime Football — voir Mentions légales.</p></div>
-<div class="legal-section"><h2>3. Billets</h2><p>Places Premier League / Champions League. Droit d’accès soumis au règlement du stade.</p></div>
-<div class="legal-section"><h2>4. Commande</h2><p>Ferme après paiement. E-mail de confirmation envoyé.</p></div>
-<div class="legal-section"><h2>5. Prix</h2><p>Euros TTC, frais éventuels affichés avant paiement.</p></div>
-<div class="legal-section"><h2>6. Paiement</h2><p>En ligne, sécurisé. Commande confirmée après acceptation bancaire.</p></div>
-<div class="legal-section"><h2>7. E-billets</h2><p>Livraison par e-mail, en général rapidement, au plus tard 24&nbsp;h avant le match si possible.</p></div>
-<div class="legal-section"><h2>8. Pas de rétractation</h2><p>Art. L221-28&nbsp;: pas de rétractation pour les loisirs à date déterminée.</p></div>
-<div class="legal-section"><h2>9. Report / annulation</h2><ul><li>Report&nbsp;: billet valable nouvelle date</li><li>Annulation&nbsp;: remboursement ou équivalent selon organisateur</li></ul></div>
-<div class="legal-section"><h2>10. Accès stade</h2><p>Contrôles sécurité&nbsp;; billet invalidable si frauduleux.</p></div>
-<div class="legal-section"><h2>11. Revente</h2><p>Revente non autorisée = risque d’annulation sans remboursement.</p></div>
-<div class="legal-section"><h2>12. Responsabilité</h2><p>Pas de responsabilité pour force majeure ou faits de l’organisateur.</p></div>
-<div class="legal-section"><h2>13. Données</h2><p>Voir Confidentialité et Cookies.</p></div>
-<div class="legal-section"><h2>14. Réclamations</h2><p>Via Contact + n° de commande. Médiation possible.</p></div>
-<div class="legal-section"><h2>15. Droit</h2><p>Droit français.</p></div>
-        </div>
-        <div class="legal-content aide-panel" id="aide-panel-mentions" data-aide-panel="mentions" hidden>
-<p class="legal-content__eyebrow">Légal</p>
-<h1>Mentions légales</h1>
-<p class="legal-content__lead">Éditeur, hébergement et propriété intellectuelle.</p>
-<div class="legal-section"><h2>Éditeur</h2><p><strong>Prime Football</strong><br>10 rue du Stade, 75000 Paris<br>contact@primefootball.example<br>SAS — RCS Paris 000 000 000</p></div>
-<div class="legal-section"><h2>Hébergement</h2><p>Prestataire cloud européen.</p></div>
-<div class="legal-section"><h2>Propriété intellectuelle</h2><p>Contenus du site protégés. Marques des clubs/compétitions = leurs titulaires.</p></div>
-        </div>
-        <div class="legal-content aide-panel" id="aide-panel-privacy" data-aide-panel="privacy" hidden>
-<p class="legal-content__eyebrow">Légal</p>
-<h1>Politique de confidentialité</h1>
-<p class="legal-content__lead">Traitement de tes données personnelles (RGPD).</p>
-<div class="legal-section"><h2>Responsable</h2><p>Prime Football — privacy@primefootball.example</p></div>
-<div class="legal-section"><h2>Données</h2><ul><li>Identité / contact</li><li>Commandes</li><li>Paiement (prestataire)</li><li>Technique / cookies</li></ul></div>
-<div class="legal-section"><h2>Finalités</h2><p>Commandes, e-billets, support, anti-fraude, obligations légales, stats si consentement.</p></div>
-<div class="legal-section"><h2>Droits</h2><p>Accès, rectification, effacement, opposition, portabilité — réclamation CNIL.</p></div>
-        </div>
-        <div class="legal-content aide-panel" id="aide-panel-cookies" data-aide-panel="cookies" hidden>
-<p class="legal-content__eyebrow">Légal</p>
-<h1>Politique cookies</h1>
-<p class="legal-content__lead">Cookies essentiels, préférences et mesure d’audience.</p>
-<div class="legal-section"><h2>Essentiels</h2><p>Panier, session, sécurité — nécessaires au site.</p></div>
-<div class="legal-section"><h2>Autres</h2><p>Préférences et analytique avec consentement si requis. Réglables dans le navigateur.</p></div>
-        </div>
-        <div class="legal-content aide-panel" id="aide-panel-about" data-aide-panel="about" hidden>
-<p class="legal-content__eyebrow">Prime Football</p>
-<h1>À propos</h1>
-<p class="legal-content__lead">Billetterie pour les fans de Premier League et Champions League.</p>
-<div class="legal-section"><h2>Mission</h2><p>Réserver une place simplement, sur mobile comme sur ordinateur.</p></div>
-<div class="legal-section"><h2>Offre</h2><ul><li>Matchs par semaine</li><li>Filtre clubs</li><li>Catégories</li><li>E-billets</li></ul></div>
-        </div>
-        <div class="legal-content aide-panel" id="aide-panel-contact" data-aide-panel="contact" hidden>
-<p class="legal-content__eyebrow">Support</p>
-<h1>Nous contacter</h1>
-<p class="legal-content__lead">Une question sur une commande ou un match&nbsp;?</p>
-<div class="legal-section"><h2>Coordonnées</h2><ul class="contact-list"><li><strong>E-mail</strong>&nbsp;: support@primefootball.example</li><li><strong>Délai</strong>&nbsp;: 24&nbsp;h ouvrées</li></ul></div>
-<form class="contact-form" action="#" method="post" onsubmit="event.preventDefault(); const t=this.querySelector('[data-toast]'); t.hidden=false; this.reset();">
-  <label><span>Nom</span><input name="name" required placeholder="Ton nom" /></label>
-  <label><span>E-mail</span><input type="email" name="email" required placeholder="toi@email.com" /></label>
-  <label><span>N° commande</span><input name="order" placeholder="PF-2026-XXXX" /></label>
-  <label><span>Sujet</span><select name="topic" required><option value="">Choisir…</option><option>Billet non reçu</option><option>Annulation</option><option>Match reporté</option><option>Paiement</option><option>Autre</option></select></label>
-  <label><span>Message</span><textarea name="message" rows="5" required></textarea></label>
-  <button type="submit" class="btn-primary">Envoyer</button>
-  <p class="legal-note" data-toast hidden>Merci&nbsp;! (Démo&nbsp;: pas d’envoi réel.)</p>
-</form>
-        </div>
-        </div>
-      </div>
-    </section>
-    <!-- AIDE_END -->
-
+      <p class="backed">
+        <span>backed by</span>
+        <img src="logos/seatpick.svg" alt="SeatPick" width="130" height="22" />
+      </p>
 
       <div class="pl-footer">
-        <div class="pl-footer__bar">
-          <button type="button" class="pl-footer__lang" aria-label="Langue">
-            Français
-            <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-
-          <a class="pl-footer__brand" href="#top" id="footer-brand">
-            <img id="footer-brand-logo" src="logos/ucl.png?v=5" alt="" width="40" height="40" />
-            <span id="footer-brand-name">Champions League</span>
-          </a>
+        <div class="footer-cols">
+          <section>
+            <h2 data-i18n="footer.connect">Contact</h2>
+            <ul>
+              <li><a class="footer-link" href="contact.html" data-i18n="footer.contact">Contact</a></li>
+              <li><a class="footer-link" href="billets.html" data-i18n="footer.tickets">Mes billets</a></li>
+            </ul>
+          </section>
+          <section>
+            <h2>Prime Football</h2>
+            <ul>
+              <li><a class="footer-link" href="a-propos.html" data-i18n="footer.about">À propos</a></li>
+              <li><a class="footer-link" href="mentions-legales.html" data-i18n="footer.mentions">Mentions légales</a></li>
+              <li><a class="footer-link" href="cookies.html" data-i18n="footer.cookies">Cookies</a></li>
+            </ul>
+          </section>
+          <section>
+            <h2 data-i18n="footer.support">Aide</h2>
+            <ul>
+              <li><a class="footer-link" href="faq.html" data-i18n="footer.faq">FAQ</a></li>
+              <li><a class="footer-link" href="cgv.html" data-i18n="footer.cgv">Conditions générales de vente</a></li>
+              <li><a class="footer-link" href="confidentialite.html" data-i18n="footer.privacy">Confidentialité</a></li>
+            </ul>
+          </section>
         </div>
-
-        <p class="pl-footer__copy" id="footer-copy">© CHAMPIONS LEAGUE 2026</p>
+        <div class="pl-footer__bar">
+          <a class="pl-footer__brand" href="#top" aria-label="Prime Football">
+            <img src="logos/prime-football.png" alt="" width="1000" height="293" />
+          </a>
+          <p class="pl-footer__copy" data-i18n="footer.copy">© 2026 Prime Football. Tous droits réservés.</p>
+        </div>
       </div>
     </div>
   </footer>
@@ -333,7 +259,7 @@
   <aside class="drawer" id="filter-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
     <div class="drawer__header">
       <h2 id="drawer-title">Filtres</h2>
-      <button type="button" class="drawer__close" id="drawer-close" aria-label="Fermer">
+      <button type="button" class="drawer__close" id="drawer-close" data-i18n-aria="filters.close" aria-label="Fermer">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3l8 8M11 3L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -343,21 +269,21 @@
 
   <dialog class="dialog" id="cart-dialog" aria-labelledby="cart-dialog-title">
     <div class="dialog__panel">
-      <button type="button" class="dialog__close" id="cart-close" aria-label="Fermer">
+      <button type="button" class="dialog__close" id="cart-close" data-i18n-aria="filters.close" aria-label="Fermer">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3l8 8M11 3L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-      <h2 id="cart-dialog-title">Ton panier</h2>
+      <h2 id="cart-dialog-title" data-i18n="cart.title">Ton panier</h2>
       <ul class="cart-list" id="cart-list"></ul>
       <div class="dialog__footer">
-        <p>Total <strong id="cart-total">0 €</strong></p>
-        <button type="button" class="btn-primary" id="checkout-btn">Valider la commande</button>
+        <p><span data-i18n="place.total">Total</span> <strong id="cart-total">0 €</strong></p>
+        <button type="button" class="btn-primary" id="checkout-btn" data-i18n="cart.checkout">Valider la commande</button>
       </div>
     </div>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-  <script src="data.js?v=50"></script>
-  <script src="app.js?v=57"></script>
-  <script src="aide.js?v=3"></script>
+  <script src="i18n.js?v=8"></script>
+  <script src="data.js?v=56"></script>
+  <script src="app.js?v=67"></script>
 </body>
 </html>

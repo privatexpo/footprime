@@ -32,6 +32,42 @@ function statusLabel(status) {
   return "Places dispo";
 }
 
+function daysUntilMatch(label) {
+  const parts = String(label || "")
+    .trim()
+    .toLowerCase()
+    .replace("é", "e")
+    .replace("û", "u")
+    .replace("ô", "o")
+    .split(/\s+/);
+  const day = Number(parts[1]);
+  const months = { jan: 0, fev: 1, mar: 2, avr: 3, mai: 4, jun: 5, jul: 6, aou: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+  const month = months[parts[2]];
+  if (!day || month == null) return null;
+  const year = month <= 5 ? 2027 : 2026;
+  const date = new Date(year, month, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((date - today) / 86400000);
+}
+
+const ICON_DEMAND = `<svg class="match-signal__icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="#e10600" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M2.5 11.5 6.2 7.8l2.2 2.2L13.5 4.2"/><path fill="none" stroke="#e10600" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9.4 4.2h4.1V8.3"/></svg>`;
+const ICON_PRICE = `<svg class="match-signal__icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="9" width="3.2" height="6" rx="0.7" fill="#d97706"/><rect x="6.4" y="5.2" width="3.2" height="9.8" rx="0.7" fill="#ea580c"/><rect x="11.8" y="1.6" width="3.2" height="13.4" rx="0.7" fill="#e10600"/></svg>`;
+
+function matchSignals(match, dateLabel) {
+  if (match.status === "sold") return "";
+  const soon = daysUntilMatch(dateLabel);
+  const chips = [];
+  if (match.status === "hot") {
+    chips.push(`<span class="match-signal match-signal--demand">${ICON_DEMAND}<span>${t("match.demand")}</span></span>`);
+  }
+  if (soon != null && soon >= 0 && soon <= 2) {
+    chips.push(`<span class="match-signal match-signal--price">${ICON_PRICE}<span>${t("match.price")}</span></span>`);
+  }
+  if (!chips.length) return "";
+  return `<div class="match-signals">${chips.join("")}</div>`;
+}
+
 function allClubs() {
   const set = new Map();
   currentWeeks().forEach((w) =>
@@ -42,11 +78,11 @@ function allClubs() {
       })
     )
   );
-  return [...set.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  return [...set.values()].sort((a, b) => a.name.localeCompare(b.name, window.pfLang ? pfLang() : "fr"));
 }
 
 function updateFilterLabels() {
-  els.clubLabel.textContent = clubFilter || "Clubs";
+  els.clubLabel.textContent = clubFilter || t("filters.clubs");
   document.getElementById("filter-club-btn").classList.toggle("is-active-value", Boolean(clubFilter));
 }
 
@@ -58,10 +94,10 @@ function matchesClub(match) {
 function openDrawer(type) {
   if (type !== "club") return;
   activeFilter = type;
-  els.drawerTitle.textContent = "Clubs";
+  els.drawerTitle.textContent = t("filters.clubs");
 
   const options = [
-    { value: "", label: "Tous les clubs", selected: !clubFilter },
+    { value: "", label: t("filters.all"), selected: !clubFilter },
     ...allClubs().map((c) => ({
       value: c.name,
       label: c.name,
@@ -115,8 +151,16 @@ function applyDrawerValue(value) {
   render();
 }
 
-function setCompetition(id) {
-  if (!COMPETITIONS[id] || competitionId === id) return;
+function setCompetition(id, club) {
+  if (!COMPETITIONS[id]) return;
+  if (competitionId === id) {
+    if (typeof club === "string") {
+      clubFilter = club;
+      weekIndex = 0;
+      render();
+    }
+    return;
+  }
 
   if (weekBusy) resetWeekSlider();
 
@@ -126,6 +170,7 @@ function setCompetition(id) {
 
   weekIndex = 0;
   clubFilter = "";
+  const pendingClub = typeof club === "string" ? club : "";
 
   document.querySelectorAll(".sub-tabs__tab").forEach((tab) => {
     const active = tab.dataset.competition === id;
@@ -143,6 +188,7 @@ function setCompetition(id) {
 
   window.setTimeout(() => {
     competitionId = id;
+    clubFilter = pendingClub;
     document.body.dataset.competition = id;
     render();
 
@@ -184,28 +230,15 @@ function render() {
     subtitleEl.textContent = competitionId === "pl" ? "Matches 2026/27" : "2026/27";
   }
 
-  const footerLink = document.getElementById("footer-comp-link");
-  const footerName = document.getElementById("footer-brand-name");
-  const footerLogo = document.getElementById("footer-brand-logo");
-  const footerCopy = document.getElementById("footer-copy");
-  if (footerLink) footerLink.textContent = competition.name;
-  if (footerName) footerName.textContent = competition.name;
-  if (footerLogo && competition.logo) {
-    footerLogo.src = competition.logo;
-    footerLogo.alt = competition.name;
-  }
-  if (footerCopy) {
-    footerCopy.textContent =
-      competitionId === "pl" ? "© PREMIER LEAGUE 2026" : "© CHAMPIONS LEAGUE 2026";
-  }
   resetWeekSlider();
-  els.weekTitle.textContent = week.title;
-  els.weekRange.textContent = week.range;
+  els.weekTitle.textContent = pfWeek(week.title);
+  els.weekRange.textContent = pfDate(week.range);
   els.prev.disabled = weekIndex === 0;
   els.next.disabled = weekIndex === weeks.length - 1;
   updateWeekProgress(weeks.length);
   updateFilterLabels();
   els.list.innerHTML = buildMatchListHtml(weekIndex);
+  els.list.classList.add("is-entering");
 }
 
 function buildMatchListHtml(index) {
@@ -217,7 +250,9 @@ function buildMatchListHtml(index) {
     .map((day) => ({ ...day, matches: day.matches.filter(matchesClub) }))
     .filter((d) => d.matches.length);
 
-  if (!days.length) return `<p class="empty">Aucun match pour ce filtre.</p>`;
+  if (!days.length) return `<p class="empty">${t("match.empty")}</p>`;
+
+  let cardIndex = 0;
 
   return days
     .map(
@@ -225,6 +260,7 @@ function buildMatchListHtml(index) {
       <section class="match-day">
         ${day.matches
           .map((match) => {
+            const i = cardIndex++;
             const sold = match.status === "sold";
             const stadium = stadiumFor(match.homeShort);
             const venue = stadium
@@ -233,14 +269,14 @@ function buildMatchListHtml(index) {
             const accent = match.homeColor || "#37003c";
             const badgeLabel = competition.shortName || competition.name;
             return `
-            <article class="match-card" style="--accent:${accent}">
+            <article class="match-card" style="--accent:${accent};--i:${i}">
               <div class="match-card__stripes" aria-hidden="true"></div>
               <span class="match-card__tag">${badgeLabel}</span>
               <div class="match-card__left">
                 <img class="match-card__comp-logo" src="${competition.logo}" alt="" width="48" height="48" decoding="async" />
                 <div class="match-card__meta">
                   <p class="match-card__comp-name">${competition.name}</p>
-                  <p class="match-card__datetime">${day.date} · ${match.kickoff}</p>
+                  <p class="match-card__datetime">${pfDate(day.date)} · ${match.kickoff}</p>
                   <p class="match-card__venue">${venue}</p>
                 </div>
               </div>
@@ -261,20 +297,21 @@ function buildMatchListHtml(index) {
               </div>
 
               <div class="match-card__right">
+                ${matchSignals(match, day.date)}
                 ${
                   sold
                     ? `<button type="button" class="btn-buy" disabled>
                         <span class="btn-buy__main">
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4V8z" stroke="currentColor" stroke-width="1.8"/></svg>
-                          Complet
+                          ${t("match.sold")}
                         </span>
                       </button>`
                     : `<a class="btn-buy" href="place.html?id=${encodeURIComponent(match.id)}">
                         <span class="btn-buy__main">
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4V8z" stroke="currentColor" stroke-width="1.8"/></svg>
-                          Acheter
+                          ${t("match.buy")}
                         </span>
-                        <span class="btn-buy__from">À partir de ${Number(match.from) || 20}&nbsp;€</span>
+                        <span class="btn-buy__from">${t("match.from", { price: Number(match.from) || 20 })}</span>
                       </a>`
                 }
               </div>
@@ -295,7 +332,7 @@ function updateWeekProgress(count, index = weekIndex) {
   progress.style.setProperty("--index", String(clamped));
   progress.setAttribute("aria-valuemax", String(total));
   progress.setAttribute("aria-valuenow", String(Math.round(clamped) + 1));
-  progress.setAttribute("aria-valuetext", `Semaine ${Math.round(clamped) + 1} sur ${total}`);
+  progress.setAttribute("aria-valuetext", t("match.weekOf", { n: Math.round(clamped) + 1, total }));
 }
 
 let weekBusy = false;
@@ -344,8 +381,8 @@ function applyWeekChrome(index) {
   const weeks = currentWeeks();
   const week = weeks[index];
   if (!week) return;
-  if (els.weekTitle) els.weekTitle.textContent = week.title;
-  if (els.weekRange) els.weekRange.textContent = week.range;
+  if (els.weekTitle) els.weekTitle.textContent = pfWeek(week.title);
+  if (els.weekRange) els.weekRange.textContent = pfDate(week.range);
   els.prev.disabled = index === 0;
   els.next.disabled = index === weeks.length - 1;
   updateWeekProgress(weeks.length, index);
@@ -373,6 +410,7 @@ function createWeekSlideSession(dir, targetIndex) {
   listTrack.style.setProperty("--slide-gap", `${gap}px`);
 
   const currentList = els.list;
+  currentList.classList.remove("is-entering");
   currentList.removeAttribute("id");
   currentList.removeAttribute("aria-live");
   currentList.style.transition = "none";
@@ -400,11 +438,11 @@ function createWeekSlideSession(dir, targetIndex) {
 
   const currentNav = document.createElement("div");
   currentNav.className = "week-nav__panel";
-  currentNav.innerHTML = `<h2>${currentWeek.title}</h2><p>${currentWeek.range}</p>`;
+  currentNav.innerHTML = `<h2>${pfWeek(currentWeek.title)}</h2><p>${pfDate(currentWeek.range)}</p>`;
 
   const nextNav = document.createElement("div");
   nextNav.className = "week-nav__panel";
-  nextNav.innerHTML = `<h2>${targetWeek.title}</h2><p>${targetWeek.range}</p>`;
+  nextNav.innerHTML = `<h2>${pfWeek(targetWeek.title)}</h2><p>${pfDate(targetWeek.range)}</p>`;
 
   if (dir > 0) navTrack.append(currentNav, nextNav);
   else navTrack.append(nextNav, currentNav);
@@ -677,6 +715,10 @@ document.querySelectorAll(".sub-tabs__tab").forEach((tab) => {
 bindCartUI();
 render();
 
+window.addEventListener("pf-lang", () => {
+  render();
+});
+
 (function setupMobileNav() {
   const nav = document.querySelector(".main-nav");
   const btn = document.getElementById("nav-menu-btn");
@@ -702,5 +744,25 @@ render();
 
   window.addEventListener("resize", () => {
     if (window.matchMedia("(min-width: 900px)").matches) close();
+  });
+})();
+
+(function bindReveals() {
+  const nodes = document.querySelectorAll(".partners, .aide-section, .pl-footer");
+  if (!nodes.length) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        io.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }
+  );
+  nodes.forEach((el) => {
+    el.classList.add("reveal");
+    io.observe(el);
   });
 })();

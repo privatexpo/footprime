@@ -299,6 +299,8 @@ const CATEGORY_NAMES = {
   cat5: "Cat 5",
 };
 const CART_KEY = "prime-football-cart";
+const HOLD_KEY = "prime-football-hold";
+const HOLD_MS = 10 * 60 * 1000;
 
 function findMatch(id) {
   for (const competition of Object.values(COMPETITIONS)) {
@@ -331,10 +333,70 @@ function loadCart() {
 
 function saveCart(cart) {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  if (!cart.length) localStorage.removeItem(HOLD_KEY);
+}
+
+function holdDeadline() {
+  const raw = Number(localStorage.getItem(HOLD_KEY) || 0);
+  return Number.isFinite(raw) ? raw : 0;
+}
+
+function startHold() {
+  const current = holdDeadline();
+  if (current > Date.now()) return current;
+  const next = Date.now() + HOLD_MS;
+  localStorage.setItem(HOLD_KEY, String(next));
+  return next;
+}
+
+function holdLeft() {
+  const deadline = holdDeadline();
+  return deadline ? deadline - Date.now() : 0;
+}
+
+function formatHold(ms) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = String(Math.floor(total / 60)).padStart(2, "0");
+  const seconds = String(total % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
+function releaseHold() {
+  saveCart([]);
+  if (typeof bindCartUI === "function") bindCartUI();
 }
 
 function cartCount(cart) {
   return cart.reduce((n, i) => n + i.qty, 0);
+}
+
+function matchFaces(title) {
+  const parts = String(title || "").split(" — ");
+  if (parts.length < 2 || typeof COMPETITIONS === "undefined") return null;
+  const home = parts[0].trim();
+  const away = parts.slice(1).join(" — ").trim();
+  for (const competition of Object.values(COMPETITIONS)) {
+    for (const week of competition.weeks) {
+      for (const day of week.days) {
+        const match = day.matches.find((entry) => entry.home === home && entry.away === away);
+        if (match) {
+          return {
+            home: match.home,
+            away: match.away,
+            homeLogo: match.homeLogo,
+            awayLogo: match.awayLogo,
+          };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function facesOf(item) {
+  if (item.homeLogo && item.awayLogo) return item;
+  const faces = matchFaces(item.title);
+  return faces ? { ...item, ...faces } : item;
 }
 
 function showToast(message) {
@@ -357,11 +419,22 @@ function bindCartUI() {
   const checkoutBtn = document.getElementById("checkout-btn");
   if (!cartBtn || !cartDialog) return;
 
+  let lastCount = null;
+
   function renderCart() {
     const cart = loadCart();
-    cartCountEl.textContent = String(cartCount(cart));
+    const nextCount = cartCount(cart);
+    if (cartCountEl) {
+      cartCountEl.textContent = String(nextCount);
+      if (lastCount !== null && nextCount !== lastCount) {
+        cartCountEl.classList.remove("is-bump");
+        void cartCountEl.offsetWidth;
+        cartCountEl.classList.add("is-bump");
+      }
+      lastCount = nextCount;
+    }
     if (!cart.length) {
-      cartList.innerHTML = `<p class="empty">Ton panier est vide.</p>`;
+      cartList.innerHTML = `<p class="empty">${t("cart.empty")}</p>`;
       cartTotal.textContent = "0 €";
       return;
     }
@@ -381,23 +454,21 @@ function bindCartUI() {
   if (!cartBtn.dataset.bound) {
     cartBtn.dataset.bound = "1";
     cartBtn.addEventListener("click", () => {
-      renderCart();
-      cartDialog.showModal();
+      window.location.href = "panier.html";
     });
     cartClose?.addEventListener("click", () => cartDialog.close());
     checkoutBtn?.addEventListener("click", () => {
       const cart = loadCart();
       if (!cart.length) {
-        showToast("Panier vide");
+        showToast(t("cart.emptyToast"));
         return;
       }
-      saveCart([]);
-      renderCart();
       cartDialog.close();
-      showToast("Commande confirmée — e-billets envoyés");
+      window.location.href = "checkout.html";
     });
   }
 
+  window.addEventListener("pf-lang", renderCart);
   renderCart();
   return renderCart;
 }
