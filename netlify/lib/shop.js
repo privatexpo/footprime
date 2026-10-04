@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import qrcode from "../../qrcode.js";
 
 const SITE = "https://primeworldtickets.com";
 
@@ -241,6 +242,18 @@ export async function creerPaiementTest({ token, name, email }) {
     }),
   });
   const ref = refDe(cree.id);
+  const item = {
+    title: "Billet test",
+    date: "Test",
+    competition: "TEST",
+    stadium: "Contrôle test",
+    kickoff: "",
+    category: "TEST",
+    price: 1,
+    qty: 1,
+    together: false,
+    tickets: [{ code: `${ref}-1`, row: 1, seat: 1 }],
+  };
   const order = {
     ref,
     wooId: cree.id,
@@ -249,7 +262,7 @@ export async function creerPaiementTest({ token, name, email }) {
     email: mail,
     created: new Date().toISOString(),
     total: 1,
-    items: [{ title: "Paiement test", price: 1, qty: 1, tickets: [] }],
+    items: [item],
   };
   const session = await sessionByteqs({
     reference: `PF-${cree.id}`,
@@ -467,17 +480,22 @@ function htmlMail({ kicker, title, intro, rows, footer }) {
 
 async function envoyerMails(order) {
   if (order.test) {
+    const item = order.items[0];
+    const ticket = item.tickets[0];
+    const url = ticketUrl(order, item, ticket);
+    const pdf = pdfBillet(order, item, ticket, url);
     await envoyerBrevo({
       to: order.email,
       from: "Prime Football <facturation@primeworldtickets.com>",
-      subject: `Paiement test ${order.ref}`,
+      subject: `Billet test ${ticket.code}`,
       html: htmlMail({
         kicker: "Test",
-        title: "Paiement test reçu",
-        intro: `Bonjour ${esc(order.name)}, le paiement test de 1 € est confirmé. Référence ${esc(order.ref)}.`,
-        rows: "<p style=\"margin:0;\"><strong>1 €</strong></p>",
-        footer: "Ceci n'est pas un billet.",
+        title: "Ton billet test",
+        intro: `Bonjour ${esc(order.name)}, le paiement test de 1 € est confirmé. Le QR est dans le PDF joint. Tu peux aussi l'ouvrir ici : <a href="${esc(url)}">${esc(ticket.code)}</a>.`,
+        rows: `<p style="margin:0;"><strong>${esc(ticket.code)}</strong><br>Billet test · TEST · 1 €</p>`,
+        footer: "Billet de test. Aucune place n'est vendue.",
       }),
+      attachment: [{ name: `${ticket.code}.pdf`, content: pdf.toString("base64") }],
       key: `pf-${order.wooId}-test`,
     });
     return;
@@ -526,7 +544,101 @@ async function envoyerMails(order) {
   });
 }
 
-async function envoyerBrevo({ to, from, subject, html, key }) {
+function qrModules(text) {
+  const qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  const count = qr.getModuleCount();
+  const rows = [];
+  for (let y = 0; y < count; y += 1) {
+    let row = "";
+    for (let x = 0; x < count; x += 1) row += qr.isDark(y, x) ? "1" : "0";
+    rows.push(row);
+  }
+  return rows;
+}
+
+function pdfText(value) {
+  let out = "";
+  for (const ch of String(value)) {
+    const code = ch.codePointAt(0);
+    if (ch === "\\" || ch === "(" || ch === ")") out += `\\${ch}`;
+    else if (code >= 32 && code <= 126) out += ch;
+    else if (code <= 255) out += `\\${code.toString(8).padStart(3, "0")}`;
+    else out += "?";
+  }
+  return out;
+}
+
+export function pdfBillet(order, item, ticket, url) {
+  const matrix = qrModules(url);
+  const scale = 6;
+  const quiet = 4;
+  const modules = matrix.length;
+  const dim = (modules + quiet * 2) * scale;
+  const pixels = Buffer.alloc(dim * dim, 255);
+  for (let y = 0; y < modules; y += 1) {
+    for (let x = 0; x < modules; x += 1) {
+      if (matrix[y][x] !== "1") continue;
+      for (let dy = 0; dy < scale; dy += 1) {
+        for (let dx = 0; dx < scale; dx += 1) {
+          const px = quiet * scale + x * scale + dx;
+          const py = quiet * scale + y * scale + dy;
+          pixels[py * dim + px] = 0;
+        }
+      }
+    }
+  }
+  const lines = [
+    "BILLET TEST",
+    "Prime Football",
+    ticket.code,
+    item.title,
+    "Rang 1 · Place 1",
+    "TEST · 1 EUR",
+    "Scan de controle. Aucune place vendue.",
+  ];
+  const imgSize = 240;
+  const draw = [
+    `q ${imgSize} 0 0 ${imgSize} 90 340 cm /Im1 Do Q`,
+    ...lines.map((line, index) => `BT /F1 ${index === 0 ? 18 : 12} Tf 48 ${300 - index * 22} Td (${pdfText(line)}) Tj ET`),
+  ].join("\n");
+  const content = Buffer.from(draw, "latin1");
+  const imageDict = Buffer.from(
+    `<< /Type /XObject /Subtype /Image /Width ${dim} /Height ${dim} /ColorSpace /DeviceGray /BitsPerComponent 8 /Length ${pixels.length} >>\nstream\n`,
+    "latin1"
+  );
+  const image = Buffer.concat([imageDict, pixels, Buffer.from("\nendstream", "latin1")]);
+  const objects = [
+    Buffer.from("<< /Type /Catalog /Pages 2 0 R >>", "latin1"),
+    Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "latin1"),
+    Buffer.from(
+      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 420 640] /Resources << /Font << /F1 4 0 R >> /XObject << /Im1 5 0 R >> >> /Contents 6 0 R >>",
+      "latin1"
+    ),
+    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "latin1"),
+    image,
+    Buffer.concat([Buffer.from(`<< /Length ${content.length} >>\nstream\n`, "latin1"), content, Buffer.from("\nendstream", "latin1")]),
+  ];
+  const parts = [Buffer.from("%PDF-1.4\n", "latin1")];
+  const offsets = [0];
+  objects.forEach((body, index) => {
+    offsets.push(parts.reduce((sum, part) => sum + part.length, 0));
+    parts.push(Buffer.from(`${index + 1} 0 obj\n`, "latin1"), body, Buffer.from("\nendobj\n", "latin1"));
+  });
+  const startxref = parts.reduce((sum, part) => sum + part.length, 0);
+  let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i <= objects.length; i += 1) xref += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  parts.push(
+    Buffer.from(
+      `${xref}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${startxref}\n%%EOF`,
+      "latin1"
+    )
+  );
+  return Buffer.concat(parts);
+}
+
+async function envoyerBrevo({ to, from, subject, html, key, attachment }) {
   const apiKey = env("BREVO_API_KEY");
   if (!apiKey) throw new ShopError("Brevo n'est pas configuré.", 500);
   const match = String(from).match(/^(.*)<([^>]+)>$/);
@@ -542,12 +654,13 @@ async function envoyerBrevo({ to, from, subject, html, key }) {
       subject,
       htmlContent: html,
       headers: { "Idempotency-Key": key },
+      ...(attachment?.length ? { attachment } : {}),
     }),
   });
   if (res.ok || res.status === 201 || res.status === 202) return;
   const secours = env("MAIL_FROM");
   if (secours && from !== secours) {
-    return envoyerBrevo({ to, from: secours, subject, html, key });
+    return envoyerBrevo({ to, from: secours, subject, html, key, attachment });
   }
   const result = await res.json().catch(() => ({}));
   throw new ShopError(`Brevo : ${result.message || res.status}`, 502);

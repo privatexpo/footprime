@@ -250,6 +250,7 @@ function paintGate(root) {
       </svg>
     </div>
     <p class="gate-kicker">${esc(t("gate.kicker"))}</p>
+    ${data.k === "TEST" || data.g === "TEST" ? `<p class="gate-kicker">TEST</p>` : ""}
     <h1 class="gate-status">${esc(t("gate.valid"))}</h1>
     <article class="gate-card">
       ${data.k ? `<p class="gate-card__comp">${esc(data.k)}</p>` : ""}

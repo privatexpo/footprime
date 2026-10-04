@@ -13,7 +13,7 @@ export async function handler(event) {
   const params = event.queryStringParameters || {};
   try {
     const result = await lireCommande(params.commande, params.key);
-    if (!result.paid) return reponse({ paid: false, ref: result.order.ref });
+    if (!result.paid && !result.order.test) return reponse({ paid: false, ref: result.order.ref });
     return reponse({ paid: true, order: result.order });
   } catch (error) {
     const status = error instanceof ShopError ? error.status : 500;
