@@ -1710,6 +1710,14 @@ body:not([data-competition]) .match-card__comp-logo {
   background: #fff;
 }
 
+.place-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.45rem;
+}
+
 .place-card__comp {
   display: inline-flex;
   align-items: center;
@@ -1760,7 +1768,7 @@ body:not([data-competition]) .match-card__comp-logo {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin: 0.75rem 0 0;
+  margin: 0;
   padding: 0.28rem 0.65rem;
   border-radius: 999px;
   background: #fff1f1;

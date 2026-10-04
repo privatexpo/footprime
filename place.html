@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=117" />
+  <link rel="stylesheet" href="styles.css?v=118" />
 </head>
 <body>
   <a class="skip-link" href="#place-main" data-i18n="nav.skipPlace">Aller au contenu</a>
@@ -59,8 +59,10 @@
           <aside class="place-card" id="place-card" aria-label="Match">
             <div class="place-card__split" id="place-match"></div>
             <div class="place-card__body" id="place-meta" hidden>
-              <p class="place-card__comp" id="place-eyebrow"></p>
-              <p class="place-hot" id="place-hot" hidden></p>
+              <div class="place-card__topline">
+                <p class="place-card__comp" id="place-eyebrow"></p>
+                <p class="place-hot" id="place-hot" hidden></p>
+              </div>
               <ul class="place-facts">
                 <li>
                   <span class="place-facts__k" data-i18n="place.when">Date</span>
