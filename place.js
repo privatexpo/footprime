@@ -342,25 +342,6 @@ function selectedCategory() {
   return CATEGORY_DEFS.find((c) => c.id === id) || null;
 }
 
-function syncPitch(def) {
-  const pitch = document.getElementById("place-pitch");
-  const label = document.getElementById("place-pitch-label");
-  if (!pitch || !def) return;
-  pitch.style.setProperty("--zone", def.color);
-  pitch.querySelectorAll("[data-seat]").forEach((zone) => {
-    zone.classList.toggle("is-on", zone.dataset.seat === def.seat);
-  });
-  if (label) {
-    const next = `${t(def.descKey)} · ${t("view." + def.view)} · ${def.covered ? t("place.covered") : t("place.open")}`;
-    if (label.textContent !== next) {
-      label.textContent = next;
-      label.classList.remove("is-tick");
-      void label.offsetWidth;
-      label.classList.add("is-tick");
-    }
-  }
-}
-
 function updateTotal() {
   if (!els.total) return;
   const price = selectedPrice();
@@ -378,7 +359,6 @@ function updateTotal() {
   if (els.picked) els.picked.textContent = def ? t("place.picked", { n: def.num }) : "";
   const unit = document.getElementById("place-unit");
   if (unit) unit.textContent = def ? `${euro(price)} × ${qty}` : "";
-  syncPitch(def);
 }
 
 document.getElementById("qty-minus")?.addEventListener("click", () => {
