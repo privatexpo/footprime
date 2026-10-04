@@ -109,22 +109,6 @@ const COMPETITIONS = withIds({
     weekShort: "S",
     weeks: [
       {
-        id: 5,
-        title: "Semaine 5",
-        short: "S5",
-        range: "Dim 4 oct",
-        days: [
-          {
-            date: "Dim 4 oct",
-            matches: [
-              /* Prix CAT 5 ≈ 60 % des tarifs officiels club (Ticket-Compare / sites clubs) */
-              m("Man United", "MUN", "#da291c", "Chelsea", "CHE", "#034694", "15:30", 45, "hot"),
-              m("Newcastle", "NEW", "#241f20", "Tottenham", "TOT", "#132257", "17:00", 30, "available"),
-            ],
-          },
-        ],
-      },
-      {
         id: 6,
         title: "Semaine 6",
         short: "S6",
