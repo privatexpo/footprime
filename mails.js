@@ -68,7 +68,7 @@ function ticketsLetter(order) {
     body: `
       <p>${esc(t("mail.hello", { name: order.name }))}</p>
       <p>${esc(t("mail.ticketsLead"))}</p>
-      <p class="mail-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.ref)}</strong></p>
+      <p class="mail-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.code || order.ref)}</strong></p>
       <p class="mail-code__help">${esc(t("mail.codeHelp"))}</p>
       <p class="mail-files">${esc(attached)}</p>
       <div class="pdf-stack">${sheets}</div>`,

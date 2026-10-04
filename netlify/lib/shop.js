@@ -55,6 +55,30 @@ function refDe(id) {
   return `PF-${String(id).padStart(6, "0")}`;
 }
 
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function codeAcces(orderId, email, orderKey) {
+  const mac = createHmac("sha256", String(orderKey || ""))
+    .update(`retrait|${orderId}|${String(email || "").trim().toLowerCase()}`)
+    .digest();
+  let brut = "";
+  for (let i = 0; i < 8; i += 1) brut += CODE_ALPHABET[mac[i] % CODE_ALPHABET.length];
+  return `${brut.slice(0, 4)}-${brut.slice(4)}`;
+}
+
+function codesEgaux(saisi, attendu) {
+  const a = String(saisi || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const b = String(attendu || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (a.length !== 8 || b.length !== 8) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
+function avecCode(order, wcOrder) {
+  const email = emailUtile(order?.email);
+  if (!email || !wcOrder?.id || !wcOrder.order_key) return order;
+  return { ...order, code: codeAcces(wcOrder.id, email, wcOrder.order_key) };
+}
+
 function idDeRef(code) {
   const m = String(code || "").trim().toUpperCase().match(/^PF-(\d+)(?:-(\d+))?$/);
   if (!m) return null;
@@ -345,7 +369,7 @@ export async function lireCommande(code, key) {
   if (!parsed) throw new ShopError("Commande introuvable.", 404);
   const wcOrder = await wc(`/orders/${parsed.id}`);
   if (key && wcOrder.order_key !== key) throw new ShopError("Commande introuvable.", 404);
-  const order = commandeDepuis(wcOrder);
+  const order = avecCode(commandeDepuis(wcOrder), wcOrder);
   if (!order) throw new ShopError("Commande introuvable.", 404);
   return { order, paid: payee(wcOrder), status: wcOrder.status };
 }
@@ -367,11 +391,13 @@ export async function livrerTest(wooId, indices = []) {
     order = await ecrireClient(wcOrder, order, trouve);
   }
   if (!emailUtile(order.email)) return;
+  order = avecCode(order, wcOrder);
   await envoyerMails(order);
   await wc(`/orders/${wcOrder.id}`, {
     method: "PUT",
     body: JSON.stringify({
       meta_data: [
+        { key: "_pf_order", value: JSON.stringify(order) },
         { key: "_pf_mail_brevo", value: "oui" },
         { key: "_pf_mail_brevo_date", value: new Date().toISOString() },
       ],
@@ -381,8 +407,39 @@ export async function livrerTest(wooId, indices = []) {
 
 export async function retrouver(email, code) {
   const mail = String(email || "").trim().toLowerCase();
+  const saisi = String(code || "").trim();
+  if (!mail || mail.startsWith("attente@") || !saisi) return null;
+  if (/^PF-\d+/i.test(saisi)) return retrouverNumero(mail, saisi);
+  if (saisi.replace(/[^a-z0-9]/gi, "").length < 8) return null;
+  const qs = new URLSearchParams({
+    search: mail,
+    status: "any",
+    per_page: "20",
+    orderby: "date",
+    order: "desc",
+  });
+  let lot = [];
+  try {
+    lot = await wc(`/orders?${qs}`);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(lot)) return null;
+  for (const wcOrder of lot) {
+    if (String(wcOrder.billing?.email || "").toLowerCase() !== mail || !wcOrder.order_key) continue;
+    const order = commandeDepuis(wcOrder);
+    const test = meta(wcOrder.meta_data, "_pf_test") === "1" || order?.test;
+    if (!payee(wcOrder) && !test) continue;
+    if (!codesEgaux(saisi, codeAcces(wcOrder.id, mail, wcOrder.order_key))) continue;
+    if (!order) return null;
+    return { order: avecCode(order, wcOrder) };
+  }
+  return null;
+}
+
+async function retrouverNumero(mail, code) {
   const parsed = idDeRef(code);
-  if (!mail || !parsed) return null;
+  if (!parsed) return null;
   let wcOrder;
   try {
     wcOrder = await wc(`/orders/${parsed.id}`);
@@ -562,11 +619,13 @@ export async function paiementRecu(corps) {
   }
   if (!order || !emailUtile(order.email)) return { ok: true, mail: "sans-email" };
   if (meta(wcOrder.meta_data, "_pf_mail_brevo") === "oui") return { ok: true, deja: true };
+  order = avecCode(order, wcOrder);
   await envoyerMails(order);
   await wc(`/orders/${wcOrder.id}`, {
     method: "PUT",
     body: JSON.stringify({
       meta_data: [
+        { key: "_pf_order", value: JSON.stringify(order) },
         { key: "_pf_mail_brevo", value: "oui" },
         { key: "_pf_mail_brevo_date", value: new Date().toISOString() },
       ],
@@ -751,7 +810,7 @@ export function htmlBillets(order) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#140018" style="background:#140018;border-radius:14px;">
         <tr><td style="padding:14px 16px;">
           <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">CODE ENVOYÉ PAR E-MAIL</p>
-          <p style="margin:4px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:1px;font-family:Menlo,Consolas,monospace;">${esc(order.ref)}</p>
+          <p style="margin:4px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:3px;font-family:Menlo,Consolas,monospace;">${esc(order.code)}</p>
         </td></tr>
       </table>
       <p style="margin:10px 0 0;color:#4b5563;font-size:15px;line-height:1.45;">Avec l'e-mail de cette commande, ce code est le seul moyen de retrouver tes billets.</p>

@@ -206,7 +206,7 @@ function orderBlock(order) {
   return `
     <section class="order-block">
       <header class="order-block__head">
-        <p class="order-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.ref)}</strong></p>
+        <p class="order-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.code || order.ref)}</strong></p>
         <p class="order-code__note">${esc(t("order.mailOnly"))}</p>
         <p class="order-meta">${esc(t("order.sent"))} <strong>${esc(order.email)}</strong> · ${esc(order.total)} €</p>
       </header>
