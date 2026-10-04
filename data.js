@@ -374,6 +374,34 @@ function showToast(message) {
   showToast._t = setTimeout(() => toast.classList.remove("is-visible"), 2200);
 }
 
+async function lancerPaiement() {
+  const cart = loadCart();
+  if (holdDeadline() && holdLeft() <= 0) {
+    releaseHold();
+    throw new Error("Le délai de 10 minutes est écoulé. Tes places ont été libérées.");
+  }
+  if (!cart.length) throw new Error(t("cart.empty"));
+  if (cart.some((item) => !item.matchId || !item.categoryId)) {
+    throw new Error("Remets les matchs dans le panier, puis valide à nouveau.");
+  }
+  const res = await fetch("/api/commande", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      lines: cart.map((item) => ({
+        matchId: item.matchId,
+        categoryId: item.categoryId,
+        qty: item.qty,
+        homeLogo: item.homeLogo || "",
+        awayLogo: item.awayLogo || "",
+      })),
+    }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
+  window.location.href = payload.url;
+}
+
 function bindCartUI() {
   const cartBtn = document.getElementById("cart-btn");
   const cartCountEl = document.getElementById("cart-count");
@@ -423,13 +451,7 @@ function bindCartUI() {
     });
     cartClose?.addEventListener("click", () => cartDialog.close());
     checkoutBtn?.addEventListener("click", () => {
-      const cart = loadCart();
-      if (!cart.length) {
-        showToast(t("cart.emptyToast"));
-        return;
-      }
-      cartDialog.close();
-      window.location.href = "checkout.html";
+      lancerPaiement().catch((err) => showToast(err.message));
     });
   }
 

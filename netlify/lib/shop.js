@@ -66,6 +66,14 @@ function places(qty) {
   return Array.from({ length: qty }, (_, i) => ({ row, seat: start + i }));
 }
 
+const ATTENTE = "attente@primeworldtickets.com";
+
+function emailUtile(value) {
+  const email = String(value || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.startsWith("attente@") || email.includes("{")) return "";
+  return email;
+}
+
 function nomParts(name) {
   const morceaux = String(name || "").trim().split(/\s+/).filter(Boolean);
   const prenom = morceaux[0] || "Client";
@@ -111,8 +119,7 @@ function payee(wcOrder) {
 }
 
 export async function creerPaiement({ name, email, lines }) {
-  const mail = String(email || "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) throw new ShopError("Indique un e-mail valide.");
+  const mail = emailUtile(email) || ATTENTE;
   const { prenom, nom } = nomParts(name);
   const panier = Array.isArray(lines) ? lines : [];
   if (!panier.length || panier.length > 8) throw new ShopError("Ton panier est vide.");
@@ -226,11 +233,10 @@ export async function creerPaiement({ name, email, lines }) {
 
 const TEST_TOKEN = "7kQ9mN2pLx4vW8dR3hFs6bYt";
 
-export async function creerPaiementTest({ token, name, email }) {
+export async function creerPaiementTest({ token }) {
   if (String(token || "") !== TEST_TOKEN) throw new ShopError("Page introuvable.", 404);
-  const mail = String(email || "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) throw new ShopError("Indique un e-mail valide.");
-  const { prenom, nom } = nomParts(name);
+  const mail = ATTENTE;
+  const { prenom, nom } = nomParts("");
   const cree = await wc("/orders", {
     method: "POST",
     body: JSON.stringify({
@@ -302,8 +308,9 @@ async function sessionByteqs(input) {
     clientReferenceId: input.reference,
     metadata: { wooId: String(input.wooId), reference: input.reference },
     lineItems: input.lignes,
-    customer: { email: input.email },
   };
+  const mail = emailUtile(input.email);
+  if (mail) corps.customer = { email: mail };
   const premier = await posterByteqs(origin, cle, corps);
   if (premier) return premier;
   if (secret && publishable && cle === secret) {
@@ -342,11 +349,23 @@ export async function lireCommande(code, key) {
   return { order, paid: payee(wcOrder), status: wcOrder.status };
 }
 
-export async function livrerTest(wooId) {
+export async function livrerTest(wooId, indices = []) {
   const wcOrder = await wc(`/orders/${wooId}`);
-  const order = commandeDepuis(wcOrder);
-  if (!order?.test || !order.email) return;
+  let order = commandeDepuis(wcOrder);
+  if (!order?.test) return;
   if (meta(wcOrder.meta_data, "_pf_mail_brevo") === "oui") return;
+  if (!emailUtile(order.email)) {
+    const trouve =
+      indices.map((valeur) => emailUtile(valeur)).find(Boolean) ||
+      (await emailClientByteqs(
+        meta(wcOrder.meta_data, "_byteqs_session_id"),
+        meta(wcOrder.meta_data, "_byteqs_checkout_url"),
+        `PF-${wcOrder.id}`
+      ));
+    if (!trouve) return;
+    order = await ecrireClient(wcOrder, order, trouve);
+  }
+  if (!emailUtile(order.email)) return;
   await envoyerMails(order);
   await wc(`/orders/${wcOrder.id}`, {
     method: "PUT",
@@ -412,6 +431,96 @@ export function signatureValide(corps, signature, horodatage) {
   );
 }
 
+function emailDansPaiement(valeur, profondeur = 0) {
+  if (profondeur > 5 || !valeur || typeof valeur !== "object") return "";
+  if (Array.isArray(valeur)) {
+    for (const item of valeur.slice(0, 8)) {
+      const trouve = emailDansPaiement(item, profondeur + 1);
+      if (trouve) return trouve;
+    }
+    return "";
+  }
+  const objet = valeur;
+  for (const cle of ["email", "customer_email", "customerEmail", "receipt_email", "receiptEmail"]) {
+    const candidat = emailUtile(objet[cle]);
+    if (candidat) return candidat;
+  }
+  for (const cle of ["customer_details", "customer", "billing_details", "billing", "payer", "object", "data", "checkout", "payment"]) {
+    if (!(cle in objet)) continue;
+    const trouve = emailDansPaiement(objet[cle], profondeur + 1);
+    if (trouve) return trouve;
+  }
+  return "";
+}
+
+function idDansUrl(checkoutUrl) {
+  try {
+    const url = new URL(checkoutUrl);
+    const query = url.searchParams.get("session_id") || url.searchParams.get("checkout_id") || url.searchParams.get("id");
+    if (query && query.length >= 6) return query;
+    const segment = url.pathname.split("/").filter(Boolean).pop() || "";
+    if (segment.length >= 8 && segment !== "hosted-checkout") return segment;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+async function lireEmail(url, cle) {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${cle}`, Accept: "application/json" },
+    signal: AbortSignal.timeout(2500),
+  });
+  if (!res.ok) return "";
+  const texte = await res.text();
+  try {
+    return emailDansPaiement(JSON.parse(texte));
+  } catch {
+    const match = texte.match(/"(?:email|customer_email|customerEmail|receipt_email)"\s*:\s*"([^"\\]+@[^"\\]+)"/i);
+    return match ? emailUtile(match[1]) : "";
+  }
+}
+
+async function emailClientByteqs(...pistes) {
+  const cle = env("BYTEQS_SECRET_KEY") || env("BYTEQS_PUBLISHABLE_KEY");
+  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeworldtickets.com").replace(/\/+$/, "");
+  if (!cle) return "";
+  const urls = new Set();
+  for (const brut of pistes.map((piste) => String(piste || "").trim()).filter((piste) => piste && !piste.includes("{"))) {
+    if (brut.startsWith("http")) urls.add(brut);
+    const ref = /^PF-\d+$/.test(brut) ? brut : "";
+    const id = ref ? "" : brut.startsWith("http") ? idDansUrl(brut) : brut;
+    if (id.length >= 6 && !id.startsWith("http")) {
+      urls.add(`${origin}/api/hosted-checkout/${encodeURIComponent(id)}`);
+      urls.add(`https://api.byteqs.io/api/checkout-sessions/${encodeURIComponent(id)}`);
+    }
+    if (ref) urls.add(`${origin}/api/hosted-checkout?clientReferenceId=${encodeURIComponent(ref)}`);
+  }
+  if (!urls.size) return "";
+  const trouves = await Promise.all([...urls].map((url) => lireEmail(url, cle).catch(() => "")));
+  return trouves.find(Boolean) || "";
+}
+
+async function ecrireClient(wcOrder, order, email, name) {
+  const mail = emailUtile(email);
+  if (!mail) return order;
+  const { prenom, nom } = nomParts(name || order.name);
+  const suivant = { ...order, email: mail, name: `${prenom} ${nom}`.trim() };
+  const maj = await wc(`/orders/${wcOrder.id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      billing: {
+        first_name: prenom,
+        last_name: nom,
+        email: mail,
+        country: wcOrder.billing?.country || "FR",
+      },
+      meta_data: [{ key: "_pf_order", value: JSON.stringify(suivant) }],
+    }),
+  });
+  return commandeDepuis(maj) || suivant;
+}
+
 export async function paiementRecu(corps) {
   const data = corps.data && typeof corps.data === "object" ? corps.data : corps;
   const objet = data.object && typeof data.object === "object" ? data.object : data;
@@ -439,8 +548,18 @@ export async function paiementRecu(corps) {
       ],
     }),
   });
-  const order = commandeDepuis(maj) || commandeDepuis(wcOrder);
-  if (!order?.email) return { ok: true, mail: "sans-email" };
+  let order = commandeDepuis(maj) || commandeDepuis(wcOrder);
+  if (order && !emailUtile(order.email)) {
+    const trouve =
+      emailDansPaiement(corps) ||
+      (await emailClientByteqs(
+        meta(wcOrder.meta_data, "_byteqs_session_id"),
+        meta(wcOrder.meta_data, "_byteqs_checkout_url"),
+        `PF-${wcOrder.id}`
+      ));
+    if (trouve) order = await ecrireClient(wcOrder, order, trouve);
+  }
+  if (!order || !emailUtile(order.email)) return { ok: true, mail: "sans-email" };
   if (meta(wcOrder.meta_data, "_pf_mail_brevo") === "oui") return { ok: true, deja: true };
   await envoyerMails(order);
   await wc(`/orders/${wcOrder.id}`, {

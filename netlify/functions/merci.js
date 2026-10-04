@@ -14,7 +14,11 @@ export async function handler(event) {
   try {
     const result = await lireCommande(params.commande, params.key);
     if (!result.paid && !result.order.test) return reponse({ paid: false, ref: result.order.ref });
-    if (result.order.test) await livrerTest(result.order.wooId).catch(() => {});
+    if (result.order.test) {
+      await livrerTest(result.order.wooId, Object.values(params)).catch(() => {});
+      const frais = await lireCommande(params.commande, params.key);
+      return reponse({ paid: true, order: frais.order });
+    }
     return reponse({ paid: true, order: result.order });
   } catch (error) {
     const status = error instanceof ShopError ? error.status : 500;

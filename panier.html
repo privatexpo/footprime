@@ -42,7 +42,8 @@
           <ul class="cart-list" id="cart-lines"></ul>
           <div class="cart-summary">
           <p class="checkout-total"><span data-i18n="place.total">Total</span> <strong id="cart-page-total">0 €</strong></p>
-          <a class="btn-primary" id="cart-checkout" href="checkout.html" data-i18n="cart.checkout">Valider la commande</a>
+          <button type="button" class="btn-primary" id="cart-checkout" data-i18n="cart.checkout">Valider la commande</button>
+          <p class="legal-note" id="cart-pay-error" hidden></p>
           <p class="cart-legal">
             <span data-i18n="cart.legalBefore">En payant, tu acceptes les</span>
             <a href="cgv.html" data-i18n="cart.cgvLink">conditions générales de vente</a>
@@ -65,8 +66,8 @@
   </main>
   <div id="chrome-bottom"></div>
   <script src="i18n.js?v=9"></script>
-  <script src="data.js?v=56"></script>
-  <script src="orders-ui.js?v=6"></script>
+  <script src="data.js?v=58"></script>
+  <script src="orders-ui.js?v=8"></script>
   <script src="chrome.js?v=2"></script>
 </body>
 </html>

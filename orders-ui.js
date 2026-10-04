@@ -189,10 +189,22 @@
       if (!button) return;
       removeLine(Number(button.getAttribute("data-remove")), paintPage);
     });
-    checkoutLink?.addEventListener("click", (event) => {
+    checkoutLink?.addEventListener("click", async () => {
+      const error = document.getElementById("cart-pay-error");
       if (holdDeadline() && holdLeft() <= 0) {
-        event.preventDefault();
         paintPage();
+        return;
+      }
+      if (error) error.hidden = true;
+      checkoutLink.disabled = true;
+      try {
+        await lancerPaiement();
+      } catch (err) {
+        if (error) {
+          error.hidden = false;
+          error.textContent = err.message;
+        }
+        checkoutLink.disabled = false;
       }
     });
     paintPage();

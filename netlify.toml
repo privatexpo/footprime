@@ -42,6 +42,12 @@
   force = true
 
 [[redirects]]
+  from = "/r/7kQ9mN2pLx4vW8dR3hFs6bYt"
+  to = "/r/7kQ9mN2pLx4vW8dR3hFs6bYt.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/thank-you"
   to = "/thank-you.html"
   status = 200
