@@ -11,6 +11,11 @@
   <link rel="stylesheet" href="styles.css?v=111" />
 </head>
 <body data-competition="ucl">
+  <script>
+    if (decodeURIComponent(location.pathname).toLowerCase().indexOf("premier") !== -1) {
+      document.body.dataset.competition = "pl";
+    }
+  </script>
   <a class="skip-link" href="#matchs" data-i18n="nav.skip">Aller aux matchs</a>
 
   <header class="main-nav">
@@ -284,6 +289,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   <script src="i18n.js?v=11"></script>
   <script src="data.js?v=61"></script>
-  <script src="app.js?v=67"></script>
+  <script src="app.js?v=68"></script>
 </body>
 </html>

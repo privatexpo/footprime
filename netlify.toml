@@ -51,3 +51,68 @@
   to = "/thank-you.html"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/champions-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/champions-league/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/championsleague"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/champions league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Champions-League"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Champions League"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/premier-league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/premier-league/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/premierleague"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/premier league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Premier-League"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Premier league"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/Premier League"
+  to = "/index.html"
+  status = 200

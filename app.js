@@ -1,4 +1,13 @@
-let competitionId = "ucl";
+function competitionDepuisUrl() {
+  const path = decodeURIComponent(window.location.pathname || "").toLowerCase();
+  const query = (new URLSearchParams(window.location.search).get("competition") || "").toLowerCase();
+  const cible = `${path} ${query}`;
+  if (cible.includes("premier")) return "pl";
+  if (cible.includes("champions")) return "ucl";
+  return "ucl";
+}
+
+let competitionId = competitionDepuisUrl();
 let weekIndex = 0;
 let clubFilter = "";
 let activeFilter = null;
@@ -217,6 +226,11 @@ function render() {
   const week = weeks[weekIndex];
 
   document.body.dataset.competition = competitionId;
+  document.querySelectorAll(".sub-tabs__tab").forEach((tab) => {
+    const active = tab.dataset.competition === competitionId;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", active ? "true" : "false");
+  });
 
   els.headerTitle.textContent = competition.headerTitle;
   if (els.competitionLogo && competition.logo) {
@@ -709,8 +723,17 @@ document.getElementById("filters-reset").addEventListener("click", () => {
 });
 
 document.querySelectorAll(".sub-tabs__tab").forEach((tab) => {
-  tab.addEventListener("click", () => setCompetition(tab.dataset.competition));
+  tab.addEventListener("click", () => {
+    const id = tab.dataset.competition;
+    const path = id === "pl" ? "/premier-league" : "/champions-league";
+    if (window.location.pathname.replace(/\/+$/, "") !== path) {
+      history.pushState({ competition: id }, "", path);
+    }
+    setCompetition(id);
+  });
 });
+
+window.addEventListener("popstate", () => setCompetition(competitionDepuisUrl()));
 
 bindCartUI();
 render();
