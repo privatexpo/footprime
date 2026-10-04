@@ -162,7 +162,10 @@ function personnaliser(html, path) {
     .replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${url}$2`)
     .replace(/(<meta property="og:locale" content=")[^"]*(")/, `$1${LOCALES[lang] || "fr_FR"}$2`)
     .replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${safeTitle}$2`)
-    .replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${safeDescription}$2`);
+    .replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${safeDescription}$2`)
+    .replace(/(<meta itemprop="name" content=")[^"]*(")/, `$1${safeTitle}$2`)
+    .replace(/(<meta itemprop="description" content=")[^"]*(")/, `$1${safeDescription}$2`)
+    .replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${url}$2`);
 }
 
 let modele;

@@ -6,6 +6,13 @@
   node_bundler = "esbuild"
   included_files = ["index.html"]
 
+[[headers]]
+  for = "/logos/og.jpg"
+  [headers.values]
+    X-Robots-Tag = "all"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=86400"
+
 [[redirects]]
   from = "/api/commande"
   to = "/.netlify/functions/commande"
