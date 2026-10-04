@@ -176,18 +176,25 @@ function qrSvg(text) {
 
 function ticketCard(order, item, ticket) {
   const seat = t("order.seat", { row: ticket.row, seat: ticket.seat });
-  const side = item.together ? `<p class="e-ticket__side">${t("order.side")}</p>` : "";
+  const where = [item.competition, item.stadium].filter(Boolean).join(" · ");
+  const when = [item.date, item.kickoff].filter(Boolean).join(" · ");
+  const test = item.competition === "TEST";
+  const side = item.together ? `<p class="pass__side">${esc(t("order.side"))}</p>` : "";
   return `
-    <article class="e-ticket">
-      <div class="e-ticket__qr" aria-hidden="true">${qrSvg(ticketUrl(order, item, ticket))}</div>
-      <div class="e-ticket__body">
-        <p class="e-ticket__kicker">${t("order.gate")}</p>
-        <h2>${item.title}</h2>
-        <p>${item.competition}${item.stadium ? ` · ${item.stadium}` : ""}</p>
-        <p>${item.date}${item.kickoff ? ` · ${item.kickoff}` : ""} · ${item.category}</p>
-        <p class="e-ticket__seat">${seat}</p>
+    <article class="pass">
+      <header class="pass__head">
+        <p class="pass__brand">Prime Football</p>
+        <p class="pass__kind">${test ? "Billet test" : "E-billet"}</p>
+        <h2>${esc(item.title)}</h2>
+        <p>${esc(where)}</p>
+        <p>${esc(when)}${item.category ? ` · ${esc(item.category)}` : ""}</p>
+      </header>
+      <div class="pass__qr" aria-hidden="true">${qrSvg(ticketUrl(order, item, ticket))}</div>
+      <p class="pass__scan">${esc(t("order.gate"))}</p>
+      <div class="pass__tear">
+        <p class="pass__seat">${esc(seat)}</p>
         ${side}
-        <p class="e-ticket__code">${ticket.code}</p>
+        <p class="pass__code">${esc(ticket.code)}</p>
       </div>
     </article>`;
 }
@@ -199,14 +206,9 @@ function orderBlock(order) {
   return `
     <section class="order-block">
       <header class="order-block__head">
-        <p class="order-code"><span>${t("order.mailCode")}</span> <strong>${order.ref}</strong></p>
-        <p class="order-code__note">${t("order.mailOnly")}</p>
-        <p class="mail-links">
-          <a href="mail-facture.html?ref=${encodeURIComponent(order.ref)}">${t("mail.openInvoice")}</a>
-          <a href="mail-billets.html?ref=${encodeURIComponent(order.ref)}">${t("mail.openTickets")}</a>
-        </p>
-        <p>${t("order.sent")} <strong>${order.email}</strong></p>
-        <p>${order.total} €</p>
+        <p class="order-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.ref)}</strong></p>
+        <p class="order-code__note">${esc(t("order.mailOnly"))}</p>
+        <p class="order-meta">${esc(t("order.sent"))} <strong>${esc(order.email)}</strong> · ${esc(order.total)} €</p>
       </header>
       <div class="ticket-grid">${cards}</div>
     </section>`;

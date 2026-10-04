@@ -4035,30 +4035,50 @@ body:not([data-competition]) .page-header__photo--pl {
 }
 
 .order-block__head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
-  margin: 0 0 0.9rem;
-  color: #374151;
+  display: grid;
+  gap: 0.28rem;
+  margin: 0 0 0.95rem;
+  padding: 1.05rem 1.1rem 1rem;
+  border-radius: 18px;
+  background: #37003c;
+  color: #fff;
 }
 
 .order-block__head p {
   margin: 0;
 }
 
-.order-code,
-.order-code__note {
-  flex-basis: 100%;
+.order-code span {
+  display: block;
+  color: #00ff85;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .order-code strong {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing: 0.04em;
+  display: block;
+  margin-top: 0.18rem;
+  color: #fff;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
 }
 
-.order-code__note {
-  color: #6b7280;
+.order-code__note,
+.order-meta {
+  color: rgba(255, 255, 255, 0.78);
   font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.order-meta {
+  margin-top: 0.35rem;
+}
+
+.order-meta strong {
+  color: #fff;
 }
 
 .ticket-grid {
@@ -4066,55 +4086,87 @@ body:not([data-competition]) .page-header__photo--pl {
   gap: 0.85rem;
 }
 
-.e-ticket {
-  display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
-  gap: 1rem;
-  align-items: center;
+.pass {
+  overflow: hidden;
+  border: 1px solid #eadff0;
+  border-radius: 18px;
   background: #fff;
-  border: 1px dashed #d1d5db;
-  border-radius: 16px;
-  padding: 0.9rem;
 }
 
-.e-ticket__qr svg {
-  width: 148px;
-  height: 148px;
-  display: block;
+.pass__head {
+  padding: 0.95rem 1rem 0.8rem;
+  background: linear-gradient(180deg, #faf7fb 0%, #fff 100%);
 }
 
-.e-ticket__kicker,
-.e-ticket__side {
-  margin: 0 0 0.25rem;
-  color: #e10600;
-  font-size: 0.75rem;
+.pass__head .pass__brand,
+.pass__head .pass__kind,
+.pass__side,
+.pass__scan {
+  margin: 0;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.e-ticket h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.05rem;
+.pass__head .pass__brand {
+  color: #37003c;
 }
 
-.e-ticket p {
+.pass__head .pass__kind,
+.pass__side {
+  margin-top: 0.28rem;
+  color: #e10600;
+}
+
+.pass h2 {
+  margin: 0.4rem 0 0.15rem;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.pass__head p {
   margin: 0;
-  color: #4b5563;
+  color: #6b7280;
   font-size: 0.92rem;
 }
 
-.e-ticket__seat {
-  margin-top: 0.35rem !important;
-  color: #111827 !important;
-  font-weight: 700;
+.pass__qr {
+  display: grid;
+  place-items: center;
+  padding: 0.15rem 1rem 0;
 }
 
-.e-ticket__code {
-  margin-top: 0.45rem !important;
+.pass__qr svg {
+  width: 196px;
+  height: 196px;
+  display: block;
+}
+
+.pass__scan {
+  margin-top: 0.15rem;
+  text-align: center;
+  color: #37003c;
+}
+
+.pass__tear {
+  margin: 0.75rem 1rem 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed #d8cfe0;
+  text-align: center;
+}
+
+.pass__seat {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.pass__code {
+  margin: 0.35rem 0 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: 0.04em;
-  color: #111827 !important;
+  color: #374151;
 }
 
 .lookup-form {
@@ -4193,9 +4245,8 @@ body:not([data-competition]) .page-header__photo--pl {
 }
 
 @media (max-width: 560px) {
-  .e-ticket {
-    grid-template-columns: 1fr;
-    justify-items: center;
+  .pass__head,
+  .pass__tear {
     text-align: center;
   }
 }

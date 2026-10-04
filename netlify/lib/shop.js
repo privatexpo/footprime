@@ -601,32 +601,69 @@ function esc(value) {
     .replace(/"/g, "&quot;");
 }
 
+function nomAffiche(name) {
+  const value = String(name || "").replace(/\s+/g, " ").trim();
+  if (!value || /^client( client)?$/i.test(value)) return "";
+  return value;
+}
+
 function htmlMail({ kicker, title, intro, rows, footer }) {
-  return `<!DOCTYPE html><html><body style="margin:0;background:#f4f1f6;font-family:Arial,sans-serif;color:#1a1020;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1f6;padding:24px 12px;"><tr><td align="center">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:16px;overflow:hidden;">
-    <tr><td style="background:#37003c;padding:18px 22px;color:#fff;font-weight:700;">Prime Football · ${esc(kicker)}</td></tr>
-    <tr><td style="padding:22px;">
-      <h1 style="margin:0 0 8px;font-size:22px;">${esc(title)}</h1>
-      <p style="margin:0 0 16px;line-height:1.45;">${intro}</p>
-      ${rows}
-      <p style="margin:18px 0 0;color:#5c5360;font-size:13px;">${footer}<br>mail@primeworldtickets.com</p>
-    </td></tr>
-  </table></td></tr></table></body></html>`;
+  return `<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+</head><body style="margin:0;background:#f4f1f6;color:#1a1020;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f1f6" style="background:#f4f1f6;padding:28px 12px;"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:560px;background:#ffffff;border-radius:22px;overflow:hidden;">
+  <tr><td bgcolor="#37003c" style="background:#37003c;padding:22px 24px 18px;">
+    <p style="margin:0;color:#00ff85;font-size:11px;font-weight:700;letter-spacing:2px;">PRIME FOOTBALL</p>
+    <p style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:800;line-height:1.15;">${esc(title)}</p>
+    <p style="margin:6px 0 0;color:rgba(255,255,255,.72);font-size:13px;">${esc(kicker)}</p>
+  </td></tr>
+  <tr><td style="height:4px;background:#00ff85;font-size:0;line-height:0;">&nbsp;</td></tr>
+  <tr><td style="padding:22px 24px 8px;font-size:15px;line-height:1.5;color:#1a1020;">${intro}</td></tr>
+  <tr><td style="padding:8px 24px 22px;">${rows}
+    <p style="margin:18px 0 0;color:#6b7280;font-size:13px;line-height:1.45;">${footer}<br>mail@primeworldtickets.com</p>
+  </td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+
+function bonjour(order) {
+  const nom = nomAffiche(order.name);
+  return nom ? `Bonjour ${esc(nom)},` : "Bonjour,";
+}
+
+function lignesFacture(order) {
+  const lignes = order.items
+    .map((item) => {
+      const when = item.kickoff ? `${item.date} · ${item.kickoff}` : item.date;
+      const ou = [item.competition, item.stadium, item.category, when].filter(Boolean).join(" · ");
+      return `<tr>
+        <td style="padding:12px 0;border-bottom:1px solid #efe8f2;">
+          <strong style="color:#1a1020;">${esc(item.title)}</strong><br>
+          <span style="color:#6b7280;font-size:13px;">${esc(ou)} · ×${item.qty}</span>
+        </td>
+        <td align="right" valign="top" style="padding:12px 0;border-bottom:1px solid #efe8f2;font-weight:800;color:#37003c;">${item.price * item.qty} €</td>
+      </tr>`;
+    })
+    .join("");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${lignes}</table>
+    <p style="margin:14px 0 0;text-align:right;font-size:18px;"><span style="color:#6b7280;font-size:13px;">Total TTC</span><br><strong style="color:#37003c;">${order.total} €</strong></p>`;
 }
 
 async function envoyerMails(order) {
+  const hello = bonjour(order);
   if (order.test) {
-    const item = order.items[0];
     await envoyerBrevo({
       to: order.email,
       from: "Prime Football <facturation@primeworldtickets.com>",
       subject: `Facture ${order.ref}`,
       html: htmlMail({
-        kicker: "Facture",
+        kicker: order.ref,
         title: "Ta facture",
-        intro: `Bonjour ${esc(order.name)}, le paiement test est confirmé. Total TTC <strong>1 €</strong>. Tes e-billets partent dans un second e-mail.`,
-        rows: `<p style="margin:0;"><strong>${esc(item.title)}</strong><br>TEST · 1 €</p>`,
+        intro: `${hello} le paiement test est confirmé. Tes e-billets partent dans un second e-mail.`,
+        rows: lignesFacture(order),
         footer: "Prime Football · primeworldtickets.com",
       }),
       key: `pf-${order.wooId}-facture`,
@@ -637,9 +674,9 @@ async function envoyerMails(order) {
       from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
       subject: `E-billets ${order.ref}`,
       html: htmlMail({
-        kicker: "E-billets",
+        kicker: order.ref,
         title: "Tes e-billets",
-        intro: `Bonjour ${esc(order.name)}, le paiement test est confirmé.`,
+        intro: `${hello} le paiement test est confirmé.`,
         rows: billets.rows,
         footer: "Billet de test. Aucune place n'est vendue.",
       }),
@@ -648,21 +685,15 @@ async function envoyerMails(order) {
     });
     return;
   }
-  const lignes = order.items
-    .map((item) => {
-      const when = item.kickoff ? `${item.date} · ${item.kickoff}` : item.date;
-      return `<p style="margin:0 0 10px;"><strong>${esc(item.title)}</strong><br>${esc(item.competition || "")} · ${esc(item.stadium || "")}<br>${esc(when)} · ${esc(item.category)} · ×${item.qty}<br><strong>${item.price * item.qty} €</strong></p>`;
-    })
-    .join("");
   await envoyerBrevo({
     to: order.email,
     from: "Prime Football <facturation@primeworldtickets.com>",
     subject: `Facture ${order.ref}`,
     html: htmlMail({
-      kicker: "Facture",
+      kicker: order.ref,
       title: "Ta facture",
-      intro: `Bonjour ${esc(order.name)}, le paiement est confirmé. Total TTC <strong>${order.total} €</strong>.`,
-      rows: lignes,
+      intro: `${hello} le paiement est confirmé.`,
+      rows: lignesFacture(order),
       footer: "Prime Football · primeworldtickets.com",
     }),
     key: `pf-${order.wooId}-facture`,
@@ -673,9 +704,9 @@ async function envoyerMails(order) {
     from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
     subject: `E-billets ${order.ref}`,
     html: htmlMail({
-      kicker: "E-billets",
+      kicker: order.ref,
       title: "Tes e-billets",
-      intro: `Bonjour ${esc(order.name)}.`,
+      intro: `${hello}`,
       rows: billets.rows,
       footer: "Présente chaque QR code à l'entrée du stade.",
     }),
@@ -692,16 +723,46 @@ function dossierBillets(order) {
       const url = ticketUrl(order, item, ticket);
       const d = new URL(url).searchParams.get("d");
       fichiers.push({ name: `${ticket.code}.pdf`, content: pdfBillet(order, item, ticket, url).toString("base64") });
-      cartes.push(`<p style="margin:16px 0 8px;"><img src="${SITE}/api/qr?d=${encodeURIComponent(d)}" width="220" height="220" alt="QR code" style="display:block;"></p>
-        <p style="margin:0 0 8px;"><strong>${esc(ticket.code)}</strong><br>${esc(item.title)} · Rang ${ticket.row} · Place ${ticket.seat}<br>PDF joint : ${esc(ticket.code)}.pdf</p>`);
+      const ou = [item.stadium, item.date, item.kickoff].filter(Boolean).join(" · ");
+      cartes.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="margin-top:16px;background:#ffffff;border:1px solid #eadff0;border-radius:16px;overflow:hidden;">
+        <tr><td bgcolor="#37003c" style="background:#37003c;padding:14px 16px;">
+          <p style="margin:0;color:#00ff85;font-size:11px;font-weight:700;letter-spacing:1.4px;">${esc(item.competition === "TEST" ? "BILLET TEST" : item.competition || "E-BILLET")}</p>
+          <p style="margin:4px 0 0;color:#ffffff;font-size:18px;font-weight:800;">${esc(item.title)}</p>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,.75);font-size:13px;">${esc(ou)}</p>
+        </td></tr>
+        <tr><td align="center" bgcolor="#ffffff" style="padding:18px 16px 8px;background:#ffffff;">
+          <img src="${SITE}/api/qr?d=${encodeURIComponent(d)}" width="220" height="220" alt="QR code" style="display:block;border:0;">
+        </td></tr>
+        <tr><td bgcolor="#ffffff" style="padding:0 16px 16px;background:#ffffff;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td width="33%" style="padding-top:12px;border-top:1px dashed #d8cfe0;">
+              <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;">RANG</p>
+              <p style="margin:3px 0 0;color:#1a1020;font-size:18px;font-weight:800;">${ticket.row}</p>
+            </td>
+            <td width="33%" style="padding-top:12px;border-top:1px dashed #d8cfe0;">
+              <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;">PLACE</p>
+              <p style="margin:3px 0 0;color:#1a1020;font-size:18px;font-weight:800;">${ticket.seat}</p>
+            </td>
+            <td width="34%" style="padding-top:12px;border-top:1px dashed #d8cfe0;">
+              <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;">PDF</p>
+              <p style="margin:3px 0 0;color:#37003c;font-size:13px;font-weight:800;">${esc(ticket.code)}.pdf</p>
+            </td>
+          </tr></table>
+          <p style="margin:10px 0 0;color:#374151;font-family:Menlo,Consolas,monospace;font-size:13px;">${esc(ticket.code)}</p>
+        </td></tr>
+      </table>`);
     }
   }
   return {
     fichiers,
-    rows: `<p style="margin:0 0 4px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#5c5360;">Code pour retrouver tes billets</p>
-      <p style="margin:0 0 6px;font-size:28px;font-weight:800;letter-spacing:1px;">${esc(order.ref)}</p>
-      <p style="margin:0;">Entre ce code avec l'e-mail de la commande.</p>
-      ${cartes.join("")}`,
+    rows: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f7f2f8" style="background:#f7f2f8;border-radius:14px;">
+      <tr><td style="padding:16px 18px;">
+        <p style="margin:0;color:#6b7280;font-size:11px;font-weight:700;letter-spacing:1.4px;">CODE POUR RETROUVER TES BILLETS</p>
+        <p style="margin:4px 0 0;color:#37003c;font-size:28px;font-weight:800;letter-spacing:1px;">${esc(order.ref)}</p>
+        <p style="margin:6px 0 0;color:#4b5563;font-size:13px;">Entre ce code avec l'e-mail de la commande.</p>
+      </td></tr>
+    </table>
+    ${cartes.join("")}`,
   };
 }
 
@@ -789,23 +850,60 @@ export function pngQr(text) {
   ]);
 }
 
+function pdfPlain(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[·•]/g, "-")
+    .replace(/[^\x20-\x7E]/g, "");
+}
+
+function pdfDraw(font, size, x, y, value) {
+  return `BT /${font} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${pdfText(pdfPlain(value).slice(0, 64))}) Tj ET`;
+}
+
 export function pdfBillet(order, item, ticket, url) {
   const { pixels, dim } = qrPixels(url);
   const test = item.competition === "TEST";
-  const lines = [
-    test ? "BILLET TEST" : "E-BILLET",
-    "Prime Football",
-    `Code ${order.ref}`,
-    ticket.code,
-    item.title,
-    `Rang ${ticket.row} · Place ${ticket.seat}`,
-    test ? "TEST · 1 EUR" : item.category || "",
-    test ? "Scan de controle. Aucune place vendue." : item.stadium || "",
-  ].filter(Boolean);
-  const imgSize = 240;
+  const kind = test ? "BILLET TEST" : "E-BILLET";
+  const where = [item.competition, item.stadium].filter(Boolean).join(" · ");
+  const when = [item.date, item.kickoff].filter(Boolean).join(" · ");
+  const note = test ? "Scan de controle. Aucune place vendue." : "Presente ce QR a l'entree du stade.";
+  const qrSize = 210;
+  const qrX = (595 - qrSize) / 2;
+  const qrY = 318;
   const draw = [
-    `q ${imgSize} 0 0 ${imgSize} 90 340 cm /Im1 Do Q`,
-    ...lines.map((line, index) => `BT /F1 ${index === 0 ? 18 : 12} Tf 48 ${300 - index * 22} Td (${pdfText(line)}) Tj ET`),
+    "0.957 0.945 0.965 rg",
+    "0 0 595 842 re f",
+    "1 1 1 rg",
+    "36 150 523 618 re f",
+    "0.216 0 0.235 rg",
+    "36 668 523 100 re f",
+    "0 1 0.522 rg",
+    "36 664 523 4 re f",
+    "1 1 1 rg",
+    pdfDraw("F2", 11, 58, 738, "PRIME FOOTBALL"),
+    pdfDraw("F2", 22, 58, 706, kind),
+    pdfDraw("F1", 12, 58, 684, order.ref),
+    "0.102 0.063 0.125 rg",
+    pdfDraw("F2", 18, 58, 620, item.title),
+    "0.35 0.32 0.4 rg",
+    pdfDraw("F1", 11, 58, 598, where),
+    pdfDraw("F1", 11, 58, 582, when || item.category || ""),
+    "0.965 0.953 0.973 rg",
+    `${qrX - 18} ${qrY - 18} ${qrSize + 36} ${qrSize + 36} re f`,
+    `q ${qrSize} 0 0 ${qrSize} ${qrX} ${qrY} cm /Im1 Do Q`,
+    "0.42 0.38 0.46 rg",
+    pdfDraw("F1", 9, 58, 272, "RANG"),
+    pdfDraw("F1", 9, 168, 272, "PLACE"),
+    pdfDraw("F1", 9, 278, 272, "CATEGORIE"),
+    "0.102 0.063 0.125 rg",
+    pdfDraw("F2", 16, 58, 252, String(ticket.row)),
+    pdfDraw("F2", 16, 168, 252, String(ticket.seat)),
+    pdfDraw("F2", 16, 278, 252, item.category || ""),
+    pdfDraw("F1", 11, 58, 214, ticket.code),
+    "0.42 0.38 0.46 rg",
+    pdfDraw("F1", 10, 58, 188, note),
   ].join("\n");
   const content = Buffer.from(draw, "latin1");
   const imageDict = Buffer.from(
@@ -817,12 +915,13 @@ export function pdfBillet(order, item, ticket, url) {
     Buffer.from("<< /Type /Catalog /Pages 2 0 R >>", "latin1"),
     Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "latin1"),
     Buffer.from(
-      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 420 640] /Resources << /Font << /F1 4 0 R >> /XObject << /Im1 5 0 R >> >> /Contents 6 0 R >>",
+      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 7 0 R >> /XObject << /Im1 5 0 R >> >> /Contents 6 0 R >>",
       "latin1"
     ),
     Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "latin1"),
     image,
     Buffer.concat([Buffer.from(`<< /Length ${content.length} >>\nstream\n`, "latin1"), content, Buffer.from("\nendstream", "latin1")]),
+    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>", "latin1"),
   ];
   const parts = [Buffer.from("%PDF-1.4\n", "latin1")];
   const offsets = [0];
