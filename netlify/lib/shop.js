@@ -607,163 +607,186 @@ function nomAffiche(name) {
   return value;
 }
 
-function htmlMail({ kicker, title, intro, rows, footer }) {
-  return `<!DOCTYPE html><html><head>
-<meta charset="utf-8">
-<meta name="color-scheme" content="light only">
-<meta name="supported-color-schemes" content="light">
-</head><body style="margin:0;background:#f4f1f6;color:#1a1020;font-family:Arial,Helvetica,sans-serif;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f1f6" style="background:#f4f1f6;padding:28px 12px;"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:560px;background:#ffffff;border-radius:22px;overflow:hidden;">
-  <tr><td bgcolor="#37003c" style="background:#37003c;padding:22px 24px 18px;">
-    <p style="margin:0;color:#00ff85;font-size:11px;font-weight:700;letter-spacing:2px;">PRIME FOOTBALL</p>
-    <p style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:800;line-height:1.15;">${esc(title)}</p>
-    <p style="margin:6px 0 0;color:rgba(255,255,255,.72);font-size:13px;">${esc(kicker)}</p>
-  </td></tr>
-  <tr><td style="height:4px;background:#00ff85;font-size:0;line-height:0;">&nbsp;</td></tr>
-  <tr><td style="padding:22px 24px 8px;font-size:15px;line-height:1.5;color:#1a1020;">${intro}</td></tr>
-  <tr><td style="padding:8px 24px 22px;">${rows}
-    <p style="margin:18px 0 0;color:#6b7280;font-size:13px;line-height:1.45;">${footer}<br>mail@primeworldtickets.com</p>
-  </td></tr>
-</table>
-</td></tr></table></body></html>`;
-}
+const LOGO = `${SITE}/logos/prime-football.png`;
 
 function bonjour(order) {
   const nom = nomAffiche(order.name);
   return nom ? `Bonjour ${esc(nom)},` : "Bonjour,";
 }
 
-function lignesFacture(order) {
+function dateLongue(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function coquille({ kicker, title, body }) {
+  return `<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+</head><body style="margin:0;background:#eceff3;font-family:Arial,Helvetica,sans-serif;color:#1c2230;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eceff3" style="background:#eceff3;"><tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:640px;background:#ffffff;border-radius:18px;overflow:hidden;">
+  <tr><td bgcolor="#37003c" style="background:#37003c;padding:14px 22px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td><img src="${LOGO}" alt="Prime Football" height="28" style="display:block;height:28px;width:auto;background:#ffffff;border-radius:8px;padding:4px 8px;"></td>
+      <td align="right" style="color:#ffffff;font-size:12px;font-weight:800;letter-spacing:1.6px;">${esc(kicker)}</td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:22px 22px 26px;">
+    <h1 style="margin:0 0 12px;font-size:28px;line-height:1.15;letter-spacing:-0.4px;">${esc(title)}</h1>
+    ${body}
+    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeworldtickets.com<br>mail@primeworldtickets.com</p>
+  </td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+
+function puce(label, value) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f7fb" style="background:#f4f7fb;border-radius:12px;margin:0 0 8px;"><tr><td style="padding:10px 12px;">
+    <p style="margin:0;color:#6b7280;font-size:11px;font-weight:700;letter-spacing:0.4px;">${esc(label)}</p>
+    <p style="margin:3px 0 0;font-size:16px;font-weight:800;">${esc(value)}</p>
+  </td></tr></table>`;
+}
+
+function ligneMeta(label, value) {
+  return `<tr>
+    <td style="padding:8px 0 0;border-top:1px solid #eef0f3;color:#6b7280;font-size:14px;">${esc(label)}</td>
+    <td align="right" style="padding:8px 0 0;border-top:1px solid #eef0f3;font-size:14px;font-weight:700;">${esc(value)}</td>
+  </tr>`;
+}
+
+function equipes(item) {
+  if (!item.homeLogo && !item.awayLogo) return "";
+  const badge = (src) => src ? `<img src="${esc(src)}" alt="" width="28" height="28" style="display:inline-block;width:28px;height:28px;vertical-align:middle;">` : "";
+  return `<p style="margin:8px 0 0;">${badge(item.homeLogo)}<span style="display:inline-block;padding:0 6px;color:#9ca3af;font-size:11px;font-weight:800;">VS</span>${badge(item.awayLogo)}</p>`;
+}
+
+function quand(item) {
+  return item.kickoff ? `${item.date} · ${item.kickoff}` : item.date || "";
+}
+
+export function htmlFacture(order) {
   const lignes = order.items
     .map((item) => {
-      const when = item.kickoff ? `${item.date} · ${item.kickoff}` : item.date;
-      const ou = [item.competition, item.stadium, item.category, when].filter(Boolean).join(" · ");
+      const ou = [item.competition, item.stadium, item.category, quand(item)].filter(Boolean).join(" · ");
       return `<tr>
-        <td style="padding:12px 0;border-bottom:1px solid #efe8f2;">
-          <strong style="color:#1a1020;">${esc(item.title)}</strong><br>
-          <span style="color:#6b7280;font-size:13px;">${esc(ou)} · ×${item.qty}</span>
+        <td style="padding:12px 0;border-top:1px solid #eef0f3;vertical-align:top;">
+          <strong>${esc(item.title)}</strong>
+          <span style="display:block;margin-top:2px;color:#6b7280;font-size:13px;">${esc(ou)}</span>
         </td>
-        <td align="right" valign="top" style="padding:12px 0;border-bottom:1px solid #efe8f2;font-weight:800;color:#37003c;">${item.price * item.qty} €</td>
+        <td align="right" valign="top" style="padding:12px 0 12px 12px;border-top:1px solid #eef0f3;white-space:nowrap;">×${item.qty}</td>
+        <td align="right" valign="top" style="padding:12px 0 12px 12px;border-top:1px solid #eef0f3;white-space:nowrap;">${item.price * item.qty} €</td>
       </tr>`;
     })
     .join("");
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${lignes}</table>
-    <p style="margin:14px 0 0;text-align:right;font-size:18px;"><span style="color:#6b7280;font-size:13px;">Total TTC</span><br><strong style="color:#37003c;">${order.total} €</strong></p>`;
+  return coquille({
+    kicker: "FACTURE",
+    title: "Ta facture",
+    body: `<p style="margin:0 0 12px;line-height:1.5;">${bonjour(order)}</p>
+      <p style="margin:0 0 16px;line-height:1.5;">Le paiement est confirmé. Le récapitulatif est ci-dessous. Tes e-billets partent dans un second e-mail.</p>
+      ${puce("N° DE FACTURE", order.ref)}
+      ${puce("DATE", dateLongue(order.created) || "—")}
+      ${puce("STATUT", "Payée")}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">
+        <tr>
+          <th align="left" style="padding:0 0 8px;color:#6b7280;font-size:11px;letter-spacing:0.4px;">MATCH</th>
+          <th align="right" style="padding:0 0 8px;color:#6b7280;font-size:11px;letter-spacing:0.4px;">QTÉ</th>
+          <th align="right" style="padding:0 0 8px;color:#6b7280;font-size:11px;letter-spacing:0.4px;">MONTANT</th>
+        </tr>
+        ${lignes}
+      </table>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;border-top:2px solid #37003c;">
+        <tr>
+          <td style="padding-top:12px;font-size:18px;font-weight:800;">Total TTC</td>
+          <td align="right" style="padding-top:12px;font-size:18px;font-weight:800;">${order.total} €</td>
+        </tr>
+      </table>`,
+  });
+}
+
+function ficheBillet(order, item, ticket) {
+  const url = ticketUrl(order, item, ticket);
+  const d = new URL(url).searchParams.get("d");
+  const place = `Rang ${ticket.row} · Place ${ticket.seat}`;
+  const champs = [
+    ["Date", quand(item)],
+    item.stadium ? ["Stade", item.stadium] : null,
+    ["Place", place],
+    ["Catégorie", item.category || ""],
+  ].filter((champ) => champ && champ[1]);
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="margin-top:14px;background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;">
+    <tr><td style="padding:16px 16px 14px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td><img src="${LOGO}" alt="Prime Football" height="22" style="display:block;height:22px;width:auto;"></td>
+        <td align="right" style="color:#e10600;font-size:12px;font-weight:800;letter-spacing:1px;">E-BILLET PDF</td>
+      </tr></table>
+      ${equipes(item)}
+      <h2 style="margin:10px 0 0;font-size:20px;line-height:1.2;">${esc(item.title)}</h2>
+      <p style="margin:4px 0 10px;color:#6b7280;font-size:13px;font-weight:700;letter-spacing:0.6px;">${esc(String(item.competition || "").toUpperCase())}</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${champs.map(([label, value]) => ligneMeta(label, value)).join("")}</table>
+      <img src="${SITE}/api/qr?d=${encodeURIComponent(d)}" width="132" height="132" alt="QR code" style="display:block;width:132px;height:132px;margin:14px auto 4px;">
+      <p style="margin:0;text-align:center;color:#6b7280;font-family:Menlo,Consolas,monospace;font-size:13px;">${esc(ticket.code)}.pdf</p>
+    </td></tr>
+  </table>`;
+}
+
+export function htmlBillets(order) {
+  const count = order.items.reduce((sum, item) => sum + (item.tickets || []).length, 0);
+  const joints = count > 1 ? `${count} PDF joints` : "1 PDF joint";
+  const lead = order.test
+    ? "Voici ton code et ton e-billet en PDF. Billet de test : aucune place n'est vendue."
+    : "Voici ton code et tes e-billets en PDF. Présente chaque QR code à l'entrée du stade.";
+  const fiches = [];
+  for (const item of order.items) {
+    for (const ticket of item.tickets || []) fiches.push(ficheBillet(order, item, ticket));
+  }
+  return coquille({
+    kicker: "E-BILLETS",
+    title: "Tes e-billets",
+    body: `<p style="margin:0 0 12px;line-height:1.5;">${bonjour(order)}</p>
+      <p style="margin:0 0 16px;line-height:1.5;">${lead}</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#140018" style="background:#140018;border-radius:14px;">
+        <tr><td style="padding:14px 16px;">
+          <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">CODE ENVOYÉ PAR E-MAIL</p>
+          <p style="margin:4px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:1px;font-family:Menlo,Consolas,monospace;">${esc(order.ref)}</p>
+        </td></tr>
+      </table>
+      <p style="margin:10px 0 0;color:#4b5563;font-size:15px;line-height:1.45;">Avec l'e-mail de cette commande, ce code est le seul moyen de retrouver tes billets.</p>
+      <p style="margin:12px 0 0;color:#37003c;font-size:16px;font-weight:800;">${joints}</p>
+      ${fiches.join("")}`,
+  });
 }
 
 async function envoyerMails(order) {
-  const hello = bonjour(order);
-  if (order.test) {
-    await envoyerBrevo({
-      to: order.email,
-      from: "Prime Football <facturation@primeworldtickets.com>",
-      subject: `Facture ${order.ref}`,
-      html: htmlMail({
-        kicker: order.ref,
-        title: "Ta facture",
-        intro: `${hello} le paiement test est confirmé. Tes e-billets partent dans un second e-mail.`,
-        rows: lignesFacture(order),
-        footer: "Prime Football · primeworldtickets.com",
-      }),
-      key: `pf-${order.wooId}-facture`,
-    });
-    const billets = dossierBillets(order);
-    await envoyerBrevo({
-      to: order.email,
-      from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
-      subject: `E-billets ${order.ref}`,
-      html: htmlMail({
-        kicker: order.ref,
-        title: "Tes e-billets",
-        intro: `${hello} le paiement test est confirmé.`,
-        rows: billets.rows,
-        footer: "Billet de test. Aucune place n'est vendue.",
-      }),
-      attachment: billets.fichiers,
-      key: `pf-${order.wooId}-billets`,
-    });
-    return;
-  }
+  const billets = dossierBillets(order);
   await envoyerBrevo({
     to: order.email,
     from: "Prime Football <facturation@primeworldtickets.com>",
     subject: `Facture ${order.ref}`,
-    html: htmlMail({
-      kicker: order.ref,
-      title: "Ta facture",
-      intro: `${hello} le paiement est confirmé.`,
-      rows: lignesFacture(order),
-      footer: "Prime Football · primeworldtickets.com",
-    }),
+    html: htmlFacture(order),
     key: `pf-${order.wooId}-facture`,
   });
-  const billets = dossierBillets(order);
   await envoyerBrevo({
     to: order.email,
     from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
     subject: `E-billets ${order.ref}`,
-    html: htmlMail({
-      kicker: order.ref,
-      title: "Tes e-billets",
-      intro: `${hello}`,
-      rows: billets.rows,
-      footer: "Présente chaque QR code à l'entrée du stade.",
-    }),
-    attachment: billets.fichiers,
+    html: htmlBillets(order),
+    attachment: billets,
     key: `pf-${order.wooId}-billets`,
   });
 }
 
 function dossierBillets(order) {
   const fichiers = [];
-  const cartes = [];
   for (const item of order.items) {
     for (const ticket of item.tickets || []) {
       const url = ticketUrl(order, item, ticket);
-      const d = new URL(url).searchParams.get("d");
       fichiers.push({ name: `${ticket.code}.pdf`, content: pdfBillet(order, item, ticket, url).toString("base64") });
-      const ou = [item.stadium, item.date, item.kickoff].filter(Boolean).join(" · ");
-      cartes.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="margin-top:16px;background:#ffffff;border:1px solid #eadff0;border-radius:16px;overflow:hidden;">
-        <tr><td bgcolor="#37003c" style="background:#37003c;padding:14px 16px;">
-          <p style="margin:0;color:#00ff85;font-size:11px;font-weight:700;letter-spacing:1.4px;">${esc(item.competition === "TEST" ? "BILLET TEST" : item.competition || "E-BILLET")}</p>
-          <p style="margin:4px 0 0;color:#ffffff;font-size:18px;font-weight:800;">${esc(item.title)}</p>
-          <p style="margin:4px 0 0;color:rgba(255,255,255,.75);font-size:13px;">${esc(ou)}</p>
-        </td></tr>
-        <tr><td align="center" bgcolor="#ffffff" style="padding:18px 16px 8px;background:#ffffff;">
-          <img src="${SITE}/api/qr?d=${encodeURIComponent(d)}" width="220" height="220" alt="QR code" style="display:block;border:0;">
-        </td></tr>
-        <tr><td bgcolor="#ffffff" style="padding:0 16px 16px;background:#ffffff;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-            <td width="33%" style="padding-top:12px;border-top:1px dashed #d8cfe0;">
-              <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;">RANG</p>
-              <p style="margin:3px 0 0;color:#1a1020;font-size:18px;font-weight:800;">${ticket.row}</p>
-            </td>
-            <td width="33%" style="padding-top:12px;border-top:1px dashed #d8cfe0;">
-              <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;">PLACE</p>
-              <p style="margin:3px 0 0;color:#1a1020;font-size:18px;font-weight:800;">${ticket.seat}</p>
-            </td>
-            <td width="34%" style="padding-top:12px;border-top:1px dashed #d8cfe0;">
-              <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;">PDF</p>
-              <p style="margin:3px 0 0;color:#37003c;font-size:13px;font-weight:800;">${esc(ticket.code)}.pdf</p>
-            </td>
-          </tr></table>
-          <p style="margin:10px 0 0;color:#374151;font-family:Menlo,Consolas,monospace;font-size:13px;">${esc(ticket.code)}</p>
-        </td></tr>
-      </table>`);
     }
   }
-  return {
-    fichiers,
-    rows: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f7f2f8" style="background:#f7f2f8;border-radius:14px;">
-      <tr><td style="padding:16px 18px;">
-        <p style="margin:0;color:#6b7280;font-size:11px;font-weight:700;letter-spacing:1.4px;">CODE POUR RETROUVER TES BILLETS</p>
-        <p style="margin:4px 0 0;color:#37003c;font-size:28px;font-weight:800;letter-spacing:1px;">${esc(order.ref)}</p>
-        <p style="margin:6px 0 0;color:#4b5563;font-size:13px;">Entre ce code avec l'e-mail de la commande.</p>
-      </td></tr>
-    </table>
-    ${cartes.join("")}`,
-  };
+  return fichiers;
 }
 
 function qrModules(text) {
@@ -854,56 +877,60 @@ function pdfPlain(value) {
   return String(value || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[·•]/g, "-")
+    .replace(/[—–]/g, " - ")
+    .replace(/[·•]/g, " - ")
     .replace(/[^\x20-\x7E]/g, "");
 }
 
 function pdfDraw(font, size, x, y, value) {
-  return `BT /${font} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${pdfText(pdfPlain(value).slice(0, 64))}) Tj ET`;
+  return `BT /${font} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${pdfText(pdfPlain(value).slice(0, 72))}) Tj ET`;
+}
+
+function pdfLargeur(value, size) {
+  return pdfPlain(value).slice(0, 72).length * size * 0.5;
+}
+
+function pdfDroite(font, size, droite, y, value) {
+  return pdfDraw(font, size, droite - pdfLargeur(value, size), y, value);
 }
 
 export function pdfBillet(order, item, ticket, url) {
   const { pixels, dim } = qrPixels(url);
-  const test = item.competition === "TEST";
-  const kind = test ? "BILLET TEST" : "E-BILLET";
-  const where = [item.competition, item.stadium].filter(Boolean).join(" · ");
-  const when = [item.date, item.kickoff].filter(Boolean).join(" · ");
-  const note = test ? "Scan de controle. Aucune place vendue." : "Presente ce QR a l'entree du stade.";
-  const qrSize = 210;
-  const qrX = (595 - qrSize) / 2;
-  const qrY = 318;
+  const when = item.kickoff ? `${item.date} - ${item.kickoff}` : item.date || "";
+  const champs = [
+    ["Date", when],
+    item.stadium ? ["Stade", item.stadium] : null,
+    ["Place", `Rang ${ticket.row} - Place ${ticket.seat}`],
+    ["Categorie", item.category || ""],
+  ].filter((champ) => champ && champ[1]);
+  const gauche = 36;
+  const droite = 384;
+  const qrSize = 132;
+  const qrX = (420 - qrSize) / 2;
+  let y = 428;
+  const lignes = [];
+  for (const [label, value] of champs) {
+    lignes.push("0.93 0.94 0.95 RG", "0.8 w", `${gauche} ${y + 16} m ${droite} ${y + 16} l S`);
+    lignes.push("0.42 0.45 0.5 rg", pdfDraw("F1", 11, gauche, y, label));
+    lignes.push("0.11 0.13 0.18 rg", pdfDroite("F2", 11, droite, y, value));
+    y -= 28;
+  }
+  const qrY = y - qrSize - 8;
   const draw = [
-    "0.957 0.945 0.965 rg",
-    "0 0 595 842 re f",
     "1 1 1 rg",
-    "36 150 523 618 re f",
+    "0 0 420 560 re f",
     "0.216 0 0.235 rg",
-    "36 668 523 100 re f",
-    "0 1 0.522 rg",
-    "36 664 523 4 re f",
-    "1 1 1 rg",
-    pdfDraw("F2", 11, 58, 738, "PRIME FOOTBALL"),
-    pdfDraw("F2", 22, 58, 706, kind),
-    pdfDraw("F1", 12, 58, 684, order.ref),
-    "0.102 0.063 0.125 rg",
-    pdfDraw("F2", 18, 58, 620, item.title),
-    "0.35 0.32 0.4 rg",
-    pdfDraw("F1", 11, 58, 598, where),
-    pdfDraw("F1", 11, 58, 582, when || item.category || ""),
-    "0.965 0.953 0.973 rg",
-    `${qrX - 18} ${qrY - 18} ${qrSize + 36} ${qrSize + 36} re f`,
+    pdfDraw("F2", 11, gauche, 516, "PRIME FOOTBALL"),
+    "0.882 0.024 0 rg",
+    pdfDroite("F2", 10, droite, 516, "E-BILLET PDF"),
+    "0.11 0.13 0.18 rg",
+    pdfDraw("F2", 16, gauche, 484, item.title),
+    "0.42 0.45 0.5 rg",
+    pdfDraw("F2", 9, gauche, 466, String(item.competition || "").toUpperCase()),
+    ...lignes,
     `q ${qrSize} 0 0 ${qrSize} ${qrX} ${qrY} cm /Im1 Do Q`,
-    "0.42 0.38 0.46 rg",
-    pdfDraw("F1", 9, 58, 272, "RANG"),
-    pdfDraw("F1", 9, 168, 272, "PLACE"),
-    pdfDraw("F1", 9, 278, 272, "CATEGORIE"),
-    "0.102 0.063 0.125 rg",
-    pdfDraw("F2", 16, 58, 252, String(ticket.row)),
-    pdfDraw("F2", 16, 168, 252, String(ticket.seat)),
-    pdfDraw("F2", 16, 278, 252, item.category || ""),
-    pdfDraw("F1", 11, 58, 214, ticket.code),
-    "0.42 0.38 0.46 rg",
-    pdfDraw("F1", 10, 58, 188, note),
+    "0.42 0.45 0.5 rg",
+    pdfDraw("F1", 10, (420 - pdfLargeur(`${ticket.code}.pdf`, 10)) / 2, qrY - 18, `${ticket.code}.pdf`),
   ].join("\n");
   const content = Buffer.from(draw, "latin1");
   const imageDict = Buffer.from(
@@ -915,7 +942,7 @@ export function pdfBillet(order, item, ticket, url) {
     Buffer.from("<< /Type /Catalog /Pages 2 0 R >>", "latin1"),
     Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "latin1"),
     Buffer.from(
-      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 7 0 R >> /XObject << /Im1 5 0 R >> >> /Contents 6 0 R >>",
+      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 420 560] /Resources << /Font << /F1 4 0 R /F2 7 0 R >> /XObject << /Im1 5 0 R >> >> /Contents 6 0 R >>",
       "latin1"
     ),
     Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "latin1"),
