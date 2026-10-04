@@ -41,7 +41,9 @@ function roundPrice(n) {
 }
 
 function catalogue() {
-  const src = readFileSync(resolve(process.cwd(), "data.js"), "utf8").split("\n").slice(0, 279).join("\n");
+  const lignes = readFileSync(resolve(process.cwd(), "data.js"), "utf8").split("\n");
+  const fin = lignes.findIndex((ligne, i) => i > 100 && ligne === "});");
+  const src = lignes.slice(0, fin + 1).join("\n");
   const competitions = new Function(`${src}\nreturn COMPETITIONS;`)();
   const matchs = [];
   for (const competition of Object.values(competitions)) {

@@ -112,23 +112,12 @@ const COMPETITIONS = withIds({
         id: 5,
         title: "Semaine 5",
         short: "S5",
-        range: "Sam 3 oct — Dim 4 oct",
+        range: "Dim 4 oct",
         days: [
-          {
-            date: "Sam 3 oct",
-            matches: [
-              /* Prix CAT 5 ≈ 60 % des tarifs officiels club (Ticket-Compare / sites clubs) */
-              m("Arsenal", "ARS", "#ef0107", "Leeds", "LEE", "#1d428a", "11:30", 20, "hot"),
-              m("Aston Villa", "AVL", "#95bfe5", "Brentford", "BRE", "#e30613", "14:00", 30, "available"),
-              m("Bournemouth", "BOU", "#da291c", "Crystal Palace", "CRY", "#1b458f", "14:00", 25, "available"),
-              m("Brighton", "BHA", "#0057b8", "Wolves", "WOL", "#fdb913", "14:00", 20, "available", true),
-              m("Sunderland", "SUN", "#eb172b", "Man City", "MCI", "#6cabdd", "16:30", 25, "hot"),
-            ],
-          },
           {
             date: "Dim 4 oct",
             matches: [
-              m("Fulham", "FUL", "#000000", "Liverpool", "LIV", "#c8102e", "13:00", 60, "hot"),
+              /* Prix CAT 5 ≈ 60 % des tarifs officiels club (Ticket-Compare / sites clubs) */
               m("Man United", "MUN", "#da291c", "Chelsea", "CHE", "#034694", "15:30", 45, "hot"),
               m("Newcastle", "NEW", "#241f20", "Tottenham", "TOT", "#132257", "17:00", 30, "available"),
             ],
@@ -202,30 +191,6 @@ const COMPETITIONS = withIds({
     weekLabel: "Semaine",
     weekShort: "S",
     weeks: [
-      {
-        id: 2,
-        title: "Semaine 2",
-        short: "S2",
-        range: "Mar 30 sep — Mer 1 oct",
-        days: [
-          {
-            date: "Mar 30 sep",
-            matches: [
-              m("Real Madrid", "RMA", "#febe10", "Dortmund", "BVB", "#fde100", "21:00", 60, "hot", true),
-              m("Bayern", "BAY", "#dc052d", "Arsenal", "ARS", "#ef0107", "21:00", 60, "hot"),
-              m("Inter", "INT", "#010e80", "Liverpool", "LIV", "#c8102e", "18:45", 40, "available"),
-            ],
-          },
-          {
-            date: "Mer 1 oct",
-            matches: [
-              m("Barcelona", "BAR", "#a50044", "PSG", "PSG", "#004170", "21:00", 90, "hot"),
-              m("Man City", "MCI", "#6cabdd", "Napoli", "NAP", "#12a0d7", "21:00", 40, "available"),
-              m("Atlético", "ATM", "#cb3524", "Chelsea", "CHE", "#034694", "18:45", 40, "sold"),
-            ],
-          },
-        ],
-      },
       {
         id: 3,
         title: "Semaine 3",
