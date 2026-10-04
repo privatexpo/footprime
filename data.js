@@ -431,6 +431,23 @@ async function lancerPaiement() {
   }
 }
 
+async function lancerPaiementTest(token) {
+  ecranPaiement(true);
+  try {
+    const res = await fetch("/api/commande-test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
+    window.location.href = payload.url;
+  } catch (error) {
+    ecranPaiement(false);
+    throw error;
+  }
+}
+
 function bindCartUI() {
   const cartBtn = document.getElementById("cart-btn");
   const cartCountEl = document.getElementById("cart-count");

@@ -231,7 +231,7 @@ export async function creerPaiement({ name, email, lines }) {
   return { url: session.checkoutUrl, ref };
 }
 
-const TEST_TOKEN = "7kQ9mN2pLx4vW8dR3hFs6bYt";
+const TEST_TOKEN = "k7Pm2Qx9Vn4Lr8Wt3Hs6YbD";
 
 export async function creerPaiementTest({ token }) {
   if (String(token || "") !== TEST_TOKEN) throw new ShopError("Page introuvable.", 404);

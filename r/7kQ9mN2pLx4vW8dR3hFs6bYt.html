@@ -2,36 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
+  <meta http-equiv="refresh" content="0; url=/panier.html?test=k7Pm2Qx9Vn4Lr8Wt3Hs6YbD" />
   <title>Paiement</title>
-  <link rel="stylesheet" href="../styles.css?v=108" />
 </head>
 <body>
-  <main class="page-doc">
-    <div class="shell">
-      <article class="legal-content">
-        <h1>Paiement test</h1>
-        <p class="legal-content__lead" id="test-lead">Ouverture du paiement…</p>
-      </article>
-    </div>
-  </main>
-  <script>
-    const TOKEN = "7kQ9mN2pLx4vW8dR3hFs6bYt";
-    const lead = document.getElementById("test-lead");
-    fetch("/api/commande-test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: TOKEN }),
-    })
-      .then((res) => res.json().then((payload) => ({ ok: res.ok, payload })))
-      .then(({ ok, payload }) => {
-        if (!ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
-        window.location.href = payload.url;
-      })
-      .catch((err) => {
-        lead.textContent = err.message;
-      });
-  </script>
+  <script>location.replace("/panier.html?test=k7Pm2Qx9Vn4Lr8Wt3Hs6YbD");</script>
 </body>
 </html>

@@ -43,9 +43,8 @@
 
 [[redirects]]
   from = "/r/7kQ9mN2pLx4vW8dR3hFs6bYt"
-  to = "/r/7kQ9mN2pLx4vW8dR3hFs6bYt.html"
-  status = 200
-  force = true
+  to = "/panier.html?test=k7Pm2Qx9Vn4Lr8Wt3Hs6YbD"
+  status = 302
 
 [[redirects]]
   from = "/thank-you"

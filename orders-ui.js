@@ -130,6 +130,19 @@
   const cartLines = document.getElementById("cart-lines");
   const cartReady = document.getElementById("cart-ready");
   if (cartLines && cartReady) {
+    const testToken = new URLSearchParams(window.location.search).get("test");
+    if (testToken) {
+      lancerPaiementTest(testToken).catch((err) => {
+        cartReady.hidden = false;
+        const empty = document.getElementById("cart-empty");
+        if (empty) empty.hidden = true;
+        const error = document.getElementById("cart-pay-error");
+        if (error) {
+          error.hidden = false;
+          error.textContent = err.message;
+        }
+      });
+    }
     const cartEmpty = document.getElementById("cart-empty");
     const cartTotal = document.getElementById("cart-page-total");
 
