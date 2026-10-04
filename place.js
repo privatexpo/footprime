@@ -290,11 +290,6 @@ function renderPlace() {
 
   const homeInk = inkFor(match.homeColor, match.inkHome);
   const awayInk = inkFor(match.awayColor);
-  const page = document.querySelector(".place-page");
-  if (page) {
-    page.style.setProperty("--home", match.homeColor || "#37003c");
-    page.style.setProperty("--away", match.awayColor || "#37003c");
-  }
   const comp = competitionOf(match.id);
 
   if (els.meta) els.meta.hidden = false;
