@@ -147,7 +147,7 @@ function renderCategories(from) {
       const desc = t(c.descKey);
       const viewLabel = t("view." + c.view);
       return `
-        <label class="fff-cat" style="--i:${i}">
+        <label class="fff-cat${c.id === "cat1" ? " fff-cat--best" : ""}" style="--i:${i}">
           <input type="radio" name="category" value="${c.id}" data-price="${c.price}" ${(selected ? c.id === selected : i === 0) ? "checked" : ""} />
           <span class="fff-cat__row">
             <span class="fff-cat__badge" style="--cat-color:${c.color};--cat-ink:${c.ink || "#fff"}" aria-label="Catégorie ${c.num}">
@@ -155,7 +155,7 @@ function renderCategories(from) {
               <span class="fff-cat__num">${c.num}</span>
             </span>
             <span class="fff-cat__info">
-              <span class="fff-cat__desc">${desc}</span>
+              <span class="fff-cat__desc">${desc}${c.id === "cat1" ? `<span class="fff-cat__best">${t("place.best")}</span>` : ""}</span>
               <span class="fff-cat__facts">
                 <span class="fff-cat__fact" aria-label="${viewLabel}, ${c.view} / 5">
                   ${ICON_EYE}
