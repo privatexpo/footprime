@@ -12,6 +12,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/commande-test"
+  to = "/.netlify/functions/commande-test"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/webhooks/byteqs"
   to = "/.netlify/functions/webhook-byteqs"
   status = 200

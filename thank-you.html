@@ -56,8 +56,12 @@
         lead.textContent = "Le paiement est en cours de confirmation. Tes e-billets arrivent par e-mail.";
         return false;
       }
-      lead.textContent = "Paiement confirmé. Tes e-billets partent aussi par e-mail.";
-      root.innerHTML = orderBlock(payload.order);
+      lead.textContent = payload.order.test
+        ? "Paiement test de 1 € confirmé."
+        : "Paiement confirmé. Tes e-billets partent aussi par e-mail.";
+      root.innerHTML = payload.order.test
+        ? `<p>Référence <strong>${payload.order.ref}</strong>. Un e-mail de confirmation part vers ${payload.order.email}.</p>`
+        : orderBlock(payload.order);
       viderPanier();
       return true;
     }

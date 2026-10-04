@@ -222,6 +222,59 @@ export async function creerPaiement({ name, email, lines }) {
   return { url: session.checkoutUrl, ref };
 }
 
+const TEST_TOKEN = "7kQ9mN2pLx4vW8dR3hFs6bYt";
+
+export async function creerPaiementTest({ token, name, email }) {
+  if (String(token || "") !== TEST_TOKEN) throw new ShopError("Page introuvable.", 404);
+  const mail = String(email || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) throw new ShopError("Indique un e-mail valide.");
+  const { prenom, nom } = nomParts(name);
+  const cree = await wc("/orders", {
+    method: "POST",
+    body: JSON.stringify({
+      status: "pending",
+      payment_method: "byteqs",
+      payment_method_title: "Carte",
+      set_paid: false,
+      billing: { first_name: prenom, last_name: nom, email: mail, country: "FR" },
+      fee_lines: [{ name: "Paiement test", total: "1.00", tax_status: "none" }],
+    }),
+  });
+  const ref = refDe(cree.id);
+  const order = {
+    ref,
+    wooId: cree.id,
+    test: true,
+    name: `${prenom} ${nom}`.trim(),
+    email: mail,
+    created: new Date().toISOString(),
+    total: 1,
+    items: [{ title: "Paiement test", price: 1, qty: 1, tickets: [] }],
+  };
+  const session = await sessionByteqs({
+    reference: `PF-${cree.id}`,
+    email: mail,
+    wooId: cree.id,
+    orderKey: cree.order_key,
+    lignes: [{ name: "Paiement test", amountInCents: 100, quantity: 1 }],
+  });
+  await wc(`/orders/${cree.id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      meta_data: [
+        { key: "_pf_order", value: JSON.stringify(order) },
+        { key: "_pf_ref", value: ref },
+        { key: "_pf_test", value: "1" },
+        { key: "_byteqs_status", value: "unpaid" },
+        { key: "_byteqs_reference", value: `PF-${cree.id}` },
+        { key: "_byteqs_checkout_url", value: session.checkoutUrl },
+        ...(session.id ? [{ key: "_byteqs_session_id", value: session.id }] : []),
+      ],
+    }),
+  });
+  return { url: session.checkoutUrl, ref };
+}
+
 async function sessionByteqs(input) {
   const secret = env("BYTEQS_SECRET_KEY");
   const publishable = env("BYTEQS_PUBLISHABLE_KEY");
@@ -413,6 +466,22 @@ function htmlMail({ kicker, title, intro, rows, footer }) {
 }
 
 async function envoyerMails(order) {
+  if (order.test) {
+    await envoyerBrevo({
+      to: order.email,
+      from: "Prime Football <facturation@primeworldtickets.com>",
+      subject: `Paiement test ${order.ref}`,
+      html: htmlMail({
+        kicker: "Test",
+        title: "Paiement test reçu",
+        intro: `Bonjour ${esc(order.name)}, le paiement test de 1 € est confirmé. Référence ${esc(order.ref)}.`,
+        rows: "<p style=\"margin:0;\"><strong>1 €</strong></p>",
+        footer: "Ceci n'est pas un billet.",
+      }),
+      key: `pf-${order.wooId}-test`,
+    });
+    return;
+  }
   const lignes = order.items
     .map((item) => {
       const when = item.kickoff ? `${item.date} · ${item.kickoff}` : item.date;

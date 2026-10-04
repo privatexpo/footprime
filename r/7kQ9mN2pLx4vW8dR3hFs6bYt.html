@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Paiement</title>
+  <link rel="stylesheet" href="../styles.css?v=108" />
+</head>
+<body>
+  <main class="page-doc">
+    <div class="shell">
+      <article class="legal-content">
+        <h1>Paiement test</h1>
+        <p class="legal-content__lead">1 €. Aucun billet n'est émis.</p>
+        <form class="contact-form" id="test-pay">
+          <label>Nom<input name="name" required autocomplete="name" /></label>
+          <label>E-mail<input type="email" name="email" required autocomplete="email" /></label>
+          <p class="legal-note" id="test-error" hidden></p>
+          <button type="submit" class="btn-primary">Payer 1 €</button>
+        </form>
+      </article>
+    </div>
+  </main>
+  <script>
+    const TOKEN = "7kQ9mN2pLx4vW8dR3hFs6bYt";
+    if (!location.pathname.includes(TOKEN)) {
+      document.body.replaceChildren();
+    }
+    const form = document.getElementById("test-pay");
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const error = document.getElementById("test-error");
+      const button = form.querySelector("button");
+      const data = new FormData(form);
+      error.hidden = true;
+      button.disabled = true;
+      try {
+        const res = await fetch("/api/commande-test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token: TOKEN,
+            name: String(data.get("name") || ""),
+            email: String(data.get("email") || ""),
+          }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
+        window.location.href = payload.url;
+      } catch (err) {
+        error.hidden = false;
+        error.textContent = err.message;
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
