@@ -4801,3 +4801,92 @@ body:not([data-competition]) .page-header__photo--pl {
     grid-template-columns: 1fr;
   }
 }
+
+body.is-paying {
+  overflow: hidden;
+}
+
+.pay-wait {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.7rem;
+  padding: 2rem 1.25rem;
+  background: #37003c;
+  color: #fff;
+  text-align: center;
+}
+
+.pay-wait__orbit {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  margin-bottom: 0.35rem;
+}
+
+.pay-wait__orbit span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #00ff85;
+  animation: pay-spin 0.9s linear infinite;
+}
+
+.pay-wait__orbit span:nth-child(2) {
+  inset: 14px;
+  border-top-color: #fff;
+  animation-duration: 1.35s;
+  animation-direction: reverse;
+}
+
+.pay-wait__brand {
+  margin: 0;
+  color: #00ff85;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.pay-wait h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 4vw, 1.85rem);
+  letter-spacing: -0.03em;
+}
+
+.pay-wait p {
+  margin: 0;
+  max-width: 18rem;
+  color: rgba(255, 255, 255, 0.74);
+  line-height: 1.45;
+}
+
+.pay-wait__bar {
+  width: min(220px, 68vw);
+  height: 3px;
+  margin-top: 0.45rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.pay-wait__bar i {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: #00ff85;
+  animation: pay-slide 1.15s ease-in-out infinite;
+}
+
+@keyframes pay-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pay-slide {
+  0% { transform: translateX(-130%); }
+  100% { transform: translateX(280%); }
+}

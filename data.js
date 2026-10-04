@@ -374,6 +374,29 @@ function showToast(message) {
   showToast._t = setTimeout(() => toast.classList.remove("is-visible"), 2200);
 }
 
+function ecranPaiement(actif) {
+  const existant = document.getElementById("pay-wait");
+  if (!actif) {
+    existant?.remove();
+    document.body.classList.remove("is-paying");
+    return;
+  }
+  if (existant) return;
+  const el = document.createElement("div");
+  el.id = "pay-wait";
+  el.className = "pay-wait";
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-live", "polite");
+  el.innerHTML = `
+    <div class="pay-wait__orbit" aria-hidden="true"><span></span><span></span></div>
+    <p class="pay-wait__brand">PRIME FOOTBALL</p>
+    <h1>${t("pay.wait")}</h1>
+    <p>${t("pay.waitLead")}</p>
+    <div class="pay-wait__bar" aria-hidden="true"><i></i></div>`;
+  document.body.appendChild(el);
+  document.body.classList.add("is-paying");
+}
+
 async function lancerPaiement() {
   const cart = loadCart();
   if (holdDeadline() && holdLeft() <= 0) {
@@ -384,22 +407,28 @@ async function lancerPaiement() {
   if (cart.some((item) => !item.matchId || !item.categoryId)) {
     throw new Error("Remets les matchs dans le panier, puis valide à nouveau.");
   }
-  const res = await fetch("/api/commande", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      lines: cart.map((item) => ({
-        matchId: item.matchId,
-        categoryId: item.categoryId,
-        qty: item.qty,
-        homeLogo: item.homeLogo || "",
-        awayLogo: item.awayLogo || "",
-      })),
-    }),
-  });
-  const payload = await res.json().catch(() => ({}));
-  if (!res.ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
-  window.location.href = payload.url;
+  ecranPaiement(true);
+  try {
+    const res = await fetch("/api/commande", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lines: cart.map((item) => ({
+          matchId: item.matchId,
+          categoryId: item.categoryId,
+          qty: item.qty,
+          homeLogo: item.homeLogo || "",
+          awayLogo: item.awayLogo || "",
+        })),
+      }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
+    window.location.href = payload.url;
+  } catch (error) {
+    ecranPaiement(false);
+    throw error;
+  }
 }
 
 function bindCartUI() {
