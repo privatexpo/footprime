@@ -68,9 +68,15 @@
       if (totalEl) totalEl.textContent = `${cart.reduce((sum, item) => sum + item.price * item.qty, 0)} €`;
     }
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const cart = loadCart();
+      const error = document.getElementById("checkout-error");
+      const button = form.querySelector("button");
+      if (error) {
+        error.hidden = true;
+        error.textContent = "";
+      }
       if (holdDeadline() && holdLeft() <= 0) {
         releaseHold();
         paintCart();
@@ -80,16 +86,41 @@
         paintCart();
         return;
       }
+      if (cart.some((item) => !item.matchId || !item.categoryId)) {
+        if (error) {
+          error.hidden = false;
+          error.textContent = "Remets les matchs dans le panier, puis valide à nouveau.";
+        }
+        return;
+      }
       const data = new FormData(form);
-      const order = createOrder({
-        name: String(data.get("name") || ""),
-        email: String(data.get("email") || ""),
-        cart,
-      });
-      saveCart([]);
-      localStorage.removeItem(HOLD_KEY);
-      if (typeof bindCartUI === "function") bindCartUI();
-      window.location.href = `commande.html?ref=${encodeURIComponent(order.ref)}`;
+      if (button) button.disabled = true;
+      try {
+        const res = await fetch("/api/commande", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: String(data.get("name") || ""),
+            email: String(data.get("email") || ""),
+            lines: cart.map((item) => ({
+              matchId: item.matchId,
+              categoryId: item.categoryId,
+              qty: item.qty,
+              homeLogo: item.homeLogo || "",
+              awayLogo: item.awayLogo || "",
+            })),
+          }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.url) throw new Error(payload.error || "Le paiement n'a pas pu démarrer.");
+        window.location.href = payload.url;
+      } catch (err) {
+        if (error) {
+          error.hidden = false;
+          error.textContent = err.message;
+        }
+        if (button) button.disabled = false;
+      }
     });
 
     paintCart();
@@ -172,10 +203,28 @@
   const lookup = document.getElementById("lookup-form");
   const lookupRoot = document.getElementById("lookup-root");
   if (lookup && lookupRoot) {
-    function show(email, code) {
+    async function show(email, code) {
       if (!String(email || "").trim() || !String(code || "").trim()) {
         lookupRoot.innerHTML = "";
         return;
+      }
+      try {
+        const res = await fetch("/api/billets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (payload.order) {
+          lookupRoot.innerHTML = orderBlock(payload.order);
+          return;
+        }
+        if (payload.pending) {
+          lookupRoot.innerHTML = `<p class="legal-note">Le paiement de cette commande n'est pas encore confirmé.</p>`;
+          return;
+        }
+      } catch {
+        /* la recherche locale reste disponible */
       }
       const found = findByMailAndCode(email, code);
       lookupRoot.innerHTML = found ? orderBlock(found.order) : `<p class="legal-note">${t("order.none")}</p>`;

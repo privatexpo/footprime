@@ -1,0 +1,36 @@
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/commande"
+  to = "/.netlify/functions/commande"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/webhooks/byteqs"
+  to = "/.netlify/functions/webhook-byteqs"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/merci"
+  to = "/.netlify/functions/merci"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/billets"
+  to = "/.netlify/functions/billets"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/thank-you"
+  to = "/thank-you.html"
+  status = 200
+  force = true

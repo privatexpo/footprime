@@ -265,6 +265,8 @@ document.getElementById("add-to-cart")?.addEventListener("click", () => {
     competition: found.competition,
     stadium: found.stadium?.name || "",
     kickoff: found.match.kickoff || "",
+    matchId: found.match.id,
+    categoryId: def?.id || category,
     category: def?.label || CATEGORY_NAMES[category] || category,
     price: selectedPrice(),
     qty,
