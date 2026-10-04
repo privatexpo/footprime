@@ -4820,27 +4820,24 @@ body.is-paying {
   text-align: center;
 }
 
-.pay-wait__orbit {
-  position: relative;
-  width: 92px;
-  height: 92px;
-  margin-bottom: 0.35rem;
+.pay-ball {
+  width: 112px;
+  height: 112px;
+  margin-bottom: 0.45rem;
+  animation: pay-spin 1.15s linear infinite;
+  filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.35));
 }
 
-.pay-wait__orbit span {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.16);
-  border-top-color: #00ff85;
-  animation: pay-spin 0.9s linear infinite;
+.pay-ball .foot-ball,
+.basket-match--test .foot-ball {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.pay-wait__orbit span:nth-child(2) {
-  inset: 14px;
-  border-top-color: #fff;
-  animation-duration: 1.35s;
-  animation-direction: reverse;
+.basket-match--test {
+  width: 46px;
+  height: 46px;
 }
 
 .pay-wait__brand {

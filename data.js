@@ -374,6 +374,21 @@ function showToast(message) {
   showToast._t = setTimeout(() => toast.classList.remove("is-visible"), 2200);
 }
 
+function ballonFoot(id) {
+  return `<svg class="foot-ball" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><clipPath id="${id}"><circle cx="32" cy="32" r="30"/></clipPath></defs>
+    <g clip-path="url(#${id})">
+      <circle cx="32" cy="32" r="32" fill="#fff"/>
+      <polygon fill="#141414" points="32.0,24.8 38.8,29.8 36.2,37.8 27.8,37.8 25.2,29.8"/>
+      <polygon fill="#141414" points="40.2,20.7 36.6,9.5 46.1,2.6 55.6,9.5 52.0,20.7"/>
+      <polygon fill="#141414" points="45.3,36.3 54.8,29.4 64.3,36.3 60.7,47.5 48.9,47.5"/>
+      <polygon fill="#141414" points="32.0,46.0 41.5,52.9 37.9,64.1 26.1,64.1 22.5,52.9"/>
+      <polygon fill="#141414" points="18.7,36.3 15.1,47.5 3.3,47.5 -0.3,36.3 9.2,29.4"/>
+      <polygon fill="#141414" points="23.8,20.7 12.0,20.7 8.4,9.5 17.9,2.6 27.4,9.5"/>
+    </g>
+  </svg>`;
+}
+
 function ecranPaiement(actif) {
   const existant = document.getElementById("pay-wait");
   if (!actif) {
@@ -388,7 +403,7 @@ function ecranPaiement(actif) {
   el.setAttribute("role", "status");
   el.setAttribute("aria-live", "polite");
   el.innerHTML = `
-    <div class="pay-wait__orbit" aria-hidden="true"><span></span><span></span></div>
+    <div class="pay-ball">${ballonFoot("pay-ball-clip")}</div>
     <p class="pay-wait__brand">PRIME FOOTBALL</p>
     <h1>${t("pay.wait")}</h1>
     <p>${t("pay.waitLead")}</p>
@@ -449,6 +464,10 @@ async function lancerPaiementTest(token) {
 }
 
 function bindCartUI() {
+  if (!new URLSearchParams(window.location.search).get("test")) {
+    const cart = loadCart();
+    if (cart.some((item) => item.test)) saveCart(cart.filter((item) => !item.test));
+  }
   const cartBtn = document.getElementById("cart-btn");
   const cartCountEl = document.getElementById("cart-count");
   const cartDialog = document.getElementById("cart-dialog");
@@ -483,7 +502,7 @@ function bindCartUI() {
       <li>
         <span class="cart-list__title">${item.title}</span>
         <span class="cart-list__price">${item.price * item.qty} €</span>
-        <span class="cart-list__meta">${item.competition}${item.stadium ? ` · ${item.stadium}` : ""} · ${item.category} · ×${item.qty} · ${item.date}</span>
+        <span class="cart-list__meta">${item.test ? "Prime Football · 1 place" : `${item.competition}${item.stadium ? ` · ${item.stadium}` : ""} · ${item.category} · ×${item.qty} · ${item.date}`}</span>
       </li>`
       )
       .join("");
@@ -493,11 +512,14 @@ function bindCartUI() {
   if (!cartBtn.dataset.bound) {
     cartBtn.dataset.bound = "1";
     cartBtn.addEventListener("click", () => {
-      window.location.href = "panier.html";
+      const token = new URLSearchParams(window.location.search).get("test");
+      window.location.href = token ? `panier.html?test=${encodeURIComponent(token)}` : "panier.html";
     });
     cartClose?.addEventListener("click", () => cartDialog.close());
     checkoutBtn?.addEventListener("click", () => {
-      lancerPaiement().catch((err) => showToast(err.message));
+      const token = new URLSearchParams(window.location.search).get("test");
+      const run = token && loadCart().some((item) => item.test) ? lancerPaiementTest(token) : lancerPaiement();
+      run.catch((err) => showToast(err.message));
     });
   }
 

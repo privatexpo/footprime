@@ -13,6 +13,23 @@
   }
 
   function cartLine(item, index) {
+    if (item.test) {
+      return `<li class="basket-line">
+        <div class="basket-match basket-match--test" aria-hidden="true">${typeof ballonFoot === "function" ? ballonFoot("cart-ball-" + index) : ""}</div>
+        <div class="basket-line__body">
+          <p class="basket-line__title">Paiement test</p>
+          <p class="basket-line__meta">Prime Football · 1 place</p>
+        </div>
+        <div class="basket-line__end">
+          <p class="basket-line__price">1 €</p>
+          ${
+            Number.isInteger(index)
+              ? `<button type="button" class="basket-remove" data-remove="${index}">${escHtml(t("cart.remove"))}</button>`
+              : ""
+          }
+        </div>
+      </li>`;
+    }
     const face = typeof facesOf === "function" ? facesOf(item) : item;
     const side = item.qty > 1 ? ` · ${t("order.side")}` : "";
     const when = item.kickoff ? `${item.date} · ${item.kickoff}` : item.date;
@@ -132,16 +149,18 @@
   if (cartLines && cartReady) {
     const testToken = new URLSearchParams(window.location.search).get("test");
     if (testToken) {
-      lancerPaiementTest(testToken).catch((err) => {
-        cartReady.hidden = false;
-        const empty = document.getElementById("cart-empty");
-        if (empty) empty.hidden = true;
-        const error = document.getElementById("cart-pay-error");
-        if (error) {
-          error.hidden = false;
-          error.textContent = err.message;
-        }
-      });
+      saveCart([
+        {
+          test: true,
+          title: "Paiement test",
+          competition: "Prime Football",
+          category: "Test",
+          price: 1,
+          qty: 1,
+        },
+      ]);
+      localStorage.removeItem(HOLD_KEY);
+      startHold();
     }
     const cartEmpty = document.getElementById("cart-empty");
     const cartTotal = document.getElementById("cart-page-total");
@@ -211,7 +230,8 @@
       if (error) error.hidden = true;
       checkoutLink.disabled = true;
       try {
-        await lancerPaiement();
+        if (testToken) await lancerPaiementTest(testToken);
+        else await lancerPaiement();
       } catch (err) {
         if (error) {
           error.hidden = false;
