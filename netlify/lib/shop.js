@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { deflateSync } from "node:zlib";
 import qrcode from "../../qrcode.js";
+import { logoPdf } from "./logo-pdf.js";
 
 const SITE = "https://primeworldtickets.com";
 
@@ -810,7 +811,7 @@ function pdfText(value) {
     if (ch === "\\" || ch === "(" || ch === ")") out += `\\${ch}`;
     else if (code >= 32 && code <= 126) out += ch;
     else if (code <= 255) out += `\\${code.toString(8).padStart(3, "0")}`;
-    else out += "?";
+    else if (WINANSI[code]) out += `\\${WINANSI[code].toString(8).padStart(3, "0")}`;
   }
   return out;
 }
@@ -873,82 +874,156 @@ export function pngQr(text) {
   ]);
 }
 
-function pdfPlain(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[—–]/g, " - ")
-    .replace(/[·•]/g, " - ")
-    .replace(/[^\x20-\x7E]/g, "");
+const WINANSI = {
+  0x20ac: 0x80,
+  0x2026: 0x85,
+  0x2018: 0x91,
+  0x2019: 0x92,
+  0x201c: 0x93,
+  0x201d: 0x94,
+  0x2022: 0x95,
+  0x2013: 0x96,
+  0x2014: 0x97,
+  0x0152: 0x8c,
+  0x0153: 0x9c,
+};
+
+function pdfVisible(value) {
+  return [...String(value || "")]
+    .filter((ch) => {
+      const code = ch.codePointAt(0);
+      return (code >= 32 && code <= 255) || WINANSI[code];
+    })
+    .join("");
 }
 
 function pdfDraw(font, size, x, y, value) {
-  return `BT /${font} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${pdfText(pdfPlain(value).slice(0, 72))}) Tj ET`;
+  return `BT /${font} ${size} Tf 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm (${pdfText(pdfVisible(value))}) Tj ET`;
 }
 
 function pdfLargeur(value, size) {
-  return pdfPlain(value).slice(0, 72).length * size * 0.5;
+  return [...pdfVisible(value)].length * size * 0.52;
 }
 
 function pdfDroite(font, size, droite, y, value) {
   return pdfDraw(font, size, droite - pdfLargeur(value, size), y, value);
 }
 
+function pdfCoupe(value, size, max) {
+  const words = pdfVisible(value).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (line && pdfLargeur(next, size) > max) {
+      lines.push(line);
+      line = word;
+    } else line = next;
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : [""];
+}
+
+const logoBytes = Buffer.from(logoPdf.z.replace(/\s+/g, ""), "base64");
+
 export function pdfBillet(order, item, ticket, url) {
   const { pixels, dim } = qrPixels(url);
-  const when = item.kickoff ? `${item.date} - ${item.kickoff}` : item.date || "";
+  const when = item.kickoff ? `${item.date} · ${item.kickoff}` : item.date || "";
   const champs = [
     ["Date", when],
     item.stadium ? ["Stade", item.stadium] : null,
-    ["Place", `Rang ${ticket.row} - Place ${ticket.seat}`],
-    ["Categorie", item.category || ""],
+    ["Place", `Rang ${ticket.row} · Place ${ticket.seat}`],
+    ["Catégorie", item.category || ""],
   ].filter((champ) => champ && champ[1]);
-  const gauche = 36;
-  const droite = 384;
-  const qrSize = 132;
-  const qrX = (420 - qrSize) / 2;
-  let y = 428;
-  const lignes = [];
-  for (const [label, value] of champs) {
-    lignes.push("0.93 0.94 0.95 RG", "0.8 w", `${gauche} ${y + 16} m ${droite} ${y + 16} l S`);
-    lignes.push("0.42 0.45 0.5 rg", pdfDraw("F1", 11, gauche, y, label));
-    lignes.push("0.11 0.13 0.18 rg", pdfDroite("F2", 11, droite, y, value));
-    y -= 28;
-  }
-  const qrY = y - qrSize - 8;
-  const draw = [
+  const W = 420;
+  const pad = 28;
+  const logoH = 22;
+  const logoW = logoH * (logoPdf.w / logoPdf.h);
+  const titleSize = 18;
+  const titles = pdfCoupe(item.title, titleSize, W - pad * 2);
+  const qrSize = 148;
+  const rowH = 26;
+  const topBar = 8;
+  const testLine = Boolean(order?.test);
+  const H =
+    topBar +
+    22 +
+    logoH +
+    20 +
+    titles.length * 22 +
+    20 +
+    (testLine ? 18 : 0) +
+    champs.length * rowH +
+    22 +
+    qrSize +
+    18 +
+    16 +
+    28;
+  const ops = [
     "1 1 1 rg",
-    "0 0 420 560 re f",
+    `0 0 ${W} ${H} re f`,
     "0.216 0 0.235 rg",
-    pdfDraw("F2", 11, gauche, 516, "PRIME FOOTBALL"),
-    "0.882 0.024 0 rg",
-    pdfDroite("F2", 10, droite, 516, "E-BILLET PDF"),
-    "0.11 0.13 0.18 rg",
-    pdfDraw("F2", 16, gauche, 484, item.title),
+    `0 ${H - topBar} ${W} ${topBar} re f`,
+  ];
+  let y = H - topBar - 20 - logoH;
+  ops.push(`q ${logoW.toFixed(2)} 0 0 ${logoH} ${pad} ${y.toFixed(2)} cm /Im2 Do Q`);
+  ops.push("0.882 0.024 0 rg", pdfDroite("F2", 9, W - pad, y + 6, "E-BILLET PDF"));
+  y -= 22;
+  ops.push("0.07 0.09 0.12 rg");
+  for (const line of titles) {
+    ops.push(pdfDraw("F2", titleSize, pad, y, line));
+    y -= 22;
+  }
+  y += 2;
+  ops.push("0.42 0.45 0.5 rg", pdfDraw("F2", 9, pad, y, String(item.competition || "").toUpperCase()));
+  y -= 22;
+  if (testLine) {
+    ops.push("0.882 0.024 0 rg", pdfDraw("F1", 9, pad, y, "Billet de test : aucune place n'est vendue."));
+    y -= 20;
+  }
+  champs.forEach(([label, value], index) => {
+    ops.push("0.93 0.94 0.95 RG", "0.8 w", `${pad} ${y.toFixed(2)} m ${W - pad} ${y.toFixed(2)} l S`);
+    const base = y - 16;
+    ops.push("0.42 0.45 0.5 rg", pdfDraw("F1", 10, pad, base, label));
+    ops.push("0.07 0.09 0.12 rg");
+    const valueSize = pdfLargeur(value, 11) > W - pad * 2 - 100 ? 9 : 11;
+    ops.push(pdfDroite("F2", valueSize, W - pad, base, value));
+    y = base - (index === champs.length - 1 ? 20 : 12);
+  });
+  const qrX = (W - qrSize) / 2;
+  const qrY = y - qrSize;
+  ops.push(`q ${qrSize} 0 0 ${qrSize} ${qrX.toFixed(2)} ${qrY.toFixed(2)} cm /Im1 Do Q`);
+  const file = `${ticket.code}.pdf`;
+  const hint = "Présente ce QR à l'entrée du stade.";
+  ops.push(
     "0.42 0.45 0.5 rg",
-    pdfDraw("F2", 9, gauche, 466, String(item.competition || "").toUpperCase()),
-    ...lignes,
-    `q ${qrSize} 0 0 ${qrSize} ${qrX} ${qrY} cm /Im1 Do Q`,
-    "0.42 0.45 0.5 rg",
-    pdfDraw("F1", 10, (420 - pdfLargeur(`${ticket.code}.pdf`, 10)) / 2, qrY - 18, `${ticket.code}.pdf`),
-  ].join("\n");
+    pdfDraw("F1", 10, (W - pdfLargeur(file, 10)) / 2, qrY - 18, file),
+    pdfDraw("F1", 9, (W - pdfLargeur(hint, 9)) / 2, qrY - 34, hint)
+  );
+  const draw = ops.join("\n");
   const content = Buffer.from(draw, "latin1");
   const imageDict = Buffer.from(
     `<< /Type /XObject /Subtype /Image /Width ${dim} /Height ${dim} /ColorSpace /DeviceGray /BitsPerComponent 8 /Length ${pixels.length} >>\nstream\n`,
     "latin1"
   );
   const image = Buffer.concat([imageDict, pixels, Buffer.from("\nendstream", "latin1")]);
+  const logoDict = Buffer.from(
+    `<< /Type /XObject /Subtype /Image /Width ${logoPdf.w} /Height ${logoPdf.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${logoBytes.length} >>\nstream\n`,
+    "latin1"
+  );
+  const logo = Buffer.concat([logoDict, logoBytes, Buffer.from("\nendstream", "latin1")]);
   const objects = [
     Buffer.from("<< /Type /Catalog /Pages 2 0 R >>", "latin1"),
     Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "latin1"),
     Buffer.from(
-      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 420 560] /Resources << /Font << /F1 4 0 R /F2 7 0 R >> /XObject << /Im1 5 0 R >> >> /Contents 6 0 R >>",
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 4 0 R /F2 7 0 R >> /XObject << /Im1 5 0 R /Im2 8 0 R >> >> /Contents 6 0 R >>`,
       "latin1"
     ),
-    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "latin1"),
+    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>", "latin1"),
     image,
     Buffer.concat([Buffer.from(`<< /Length ${content.length} >>\nstream\n`, "latin1"), content, Buffer.from("\nendstream", "latin1")]),
-    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>", "latin1"),
+    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>", "latin1"),
+    logo,
   ];
   const parts = [Buffer.from("%PDF-1.4\n", "latin1")];
   const offsets = [0];
