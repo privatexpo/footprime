@@ -32,7 +32,7 @@ function invoiceLetter(order) {
     })
     .join("");
   return letterShell({
-    from: "facturation@primeworldtickets.com",
+    from: "facturation@primeleaguetickets.com",
     subject: `${t("mail.invoiceKicker")} ${order.ref}`,
     to: order.email,
     kicker: t("mail.invoiceKicker"),
@@ -60,7 +60,7 @@ function ticketsLetter(order) {
   const count = order.items.reduce((sum, item) => sum + item.tickets.length, 0);
   const attached = count > 1 ? t("mail.attached", { n: count }) : t("mail.attachedOne");
   return letterShell({
-    from: "billets@primeworldtickets.com",
+    from: "billets@primeleaguetickets.com",
     subject: `${t("mail.ticketsKicker")} ${order.ref}`,
     to: order.email,
     kicker: t("mail.ticketsKicker"),
@@ -113,7 +113,7 @@ function letterShell({ from, subject, to, kicker, title, body }) {
     <div class="letter__body">
       <h1>${esc(title)}</h1>
       ${body}
-      <p class="letter__foot">Prime Football · primeleaguetickets.com<br>mail@primeworldtickets.com</p>
+      <p class="letter__foot">Prime Football · primeleaguetickets.com<br>mail@primeleaguetickets.com</p>
     </div>
   </article>`;
 }

@@ -91,7 +91,7 @@ function places(qty) {
   return Array.from({ length: qty }, (_, i) => ({ row, seat: start + i }));
 }
 
-const ATTENTE = "attente@primeworldtickets.com";
+const ATTENTE = "attente@primeleaguetickets.com";
 
 function emailUtile(value) {
   const email = String(value || "").trim().toLowerCase();
@@ -323,7 +323,7 @@ export async function creerPaiementTest({ token }) {
 async function sessionByteqs(input) {
   const secret = env("BYTEQS_SECRET_KEY");
   const publishable = env("BYTEQS_PUBLISHABLE_KEY");
-  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeworldtickets.com").replace(/\/+$/, "");
+  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeleaguetickets.com").replace(/\/+$/, "");
   const cle = secret || publishable;
   if (!cle) throw new ShopError("Le paiement n'est pas configuré.", 500);
   const corps = {
@@ -541,7 +541,7 @@ async function lireEmail(url, cle) {
 
 async function emailClientByteqs(...pistes) {
   const cle = env("BYTEQS_SECRET_KEY") || env("BYTEQS_PUBLISHABLE_KEY");
-  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeworldtickets.com").replace(/\/+$/, "");
+  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeleaguetickets.com").replace(/\/+$/, "");
   if (!cle) return "";
   const urls = new Set();
   for (const brut of pistes.map((piste) => String(piste || "").trim()).filter((piste) => piste && !piste.includes("{"))) {
@@ -697,7 +697,7 @@ function coquille({ kicker, title, body }) {
   <tr><td style="padding:22px 22px 26px;">
     <h1 style="margin:0 0 12px;font-size:28px;line-height:1.15;letter-spacing:-0.4px;">${esc(title)}</h1>
     ${body}
-    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com<br>mail@primeworldtickets.com</p>
+    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com<br>mail@primeleaguetickets.com</p>
   </td></tr>
 </table>
 </td></tr></table></body></html>`;
@@ -823,14 +823,14 @@ async function envoyerMails(order) {
   const billets = dossierBillets(order);
   await envoyerBrevo({
     to: order.email,
-    from: "Prime Football <facturation@primeworldtickets.com>",
+    from: "Prime Football <facturation@primeleaguetickets.com>",
     subject: `Facture ${order.ref}`,
     html: htmlFacture(order),
     key: `pf-${order.wooId}-facture`,
   });
   await envoyerBrevo({
     to: order.email,
-    from: env("MAIL_FROM") || "Prime Football <billets@primeworldtickets.com>",
+    from: env("MAIL_FROM") || "Prime Football <billets@primeleaguetickets.com>",
     subject: `E-billets ${order.ref}`,
     html: htmlBillets(order),
     attachment: billets,
