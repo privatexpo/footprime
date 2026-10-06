@@ -1,6 +1,6 @@
 import { pngQr } from "../lib/shop.js";
 
-const SITE = "https://primeworldtickets.com";
+const SITE = "https://primeleaguetickets.com";
 
 export async function handler(event) {
   const d = String(event.queryStringParameters?.d || "");

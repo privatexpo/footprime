@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const SITE = "https://primeworldtickets.com";
+const SITE = "https://primeleaguetickets.com";
 
 const LANG_WORDS = {
   fr: "fr",

@@ -3,7 +3,7 @@ import { deflateSync } from "node:zlib";
 import qrcode from "../../qrcode.js";
 import { logoPdf } from "./logo-pdf.js";
 
-const SITE = "https://primeworldtickets.com";
+const SITE = "https://primeleaguetickets.com";
 
 export class ShopError extends Error {
   constructor(message, status = 400) {
@@ -697,7 +697,7 @@ function coquille({ kicker, title, body }) {
   <tr><td style="padding:22px 22px 26px;">
     <h1 style="margin:0 0 12px;font-size:28px;line-height:1.15;letter-spacing:-0.4px;">${esc(title)}</h1>
     ${body}
-    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeworldtickets.com<br>mail@primeworldtickets.com</p>
+    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com<br>mail@primeworldtickets.com</p>
   </td></tr>
 </table>
 </td></tr></table></body></html>`;

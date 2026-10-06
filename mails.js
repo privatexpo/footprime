@@ -113,7 +113,7 @@ function letterShell({ from, subject, to, kicker, title, body }) {
     <div class="letter__body">
       <h1>${esc(title)}</h1>
       ${body}
-      <p class="letter__foot">Prime Football · primeworldtickets.com<br>mail@primeworldtickets.com</p>
+      <p class="letter__foot">Prime Football · primeleaguetickets.com<br>mail@primeworldtickets.com</p>
     </div>
   </article>`;
 }
