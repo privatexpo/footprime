@@ -256,7 +256,7 @@ export async function creerPaiement({ name, email, lines }) {
   return { url: session.checkoutUrl, ref };
 }
 
-const TEST_TOKEN = "k7Pm2Qx9Vn4Lr8Wt3Hs6YbD";
+const TEST_TOKEN = "q8Vn3Lr6Wt2Hs9Yb4Dx7Km5Pc";
 
 export async function creerPaiementTest({ token }) {
   if (String(token || "") !== TEST_TOKEN) throw new ShopError("Page introuvable.", 404);
@@ -270,7 +270,7 @@ export async function creerPaiementTest({ token }) {
       payment_method_title: "Carte",
       set_paid: false,
       billing: { first_name: prenom, last_name: nom, email: mail, country: "FR" },
-      fee_lines: [{ name: "Paiement test", total: "1.00", tax_status: "none" }],
+      fee_lines: [{ name: "Paiement test", total: "0.10", tax_status: "none" }],
     }),
   });
   const ref = refDe(cree.id);
@@ -281,7 +281,7 @@ export async function creerPaiementTest({ token }) {
     stadium: "Contrôle test",
     kickoff: "",
     category: "TEST",
-    price: 1,
+    price: 0.1,
     qty: 1,
     together: false,
     tickets: [{ code: `${ref}-1`, row: 1, seat: 1 }],
@@ -293,7 +293,7 @@ export async function creerPaiementTest({ token }) {
     name: `${prenom} ${nom}`.trim(),
     email: mail,
     created: new Date().toISOString(),
-    total: 1,
+    total: 0.1,
     items: [item],
   };
   const session = await sessionByteqs({
@@ -301,7 +301,7 @@ export async function creerPaiementTest({ token }) {
     email: mail,
     wooId: cree.id,
     orderKey: cree.order_key,
-    lignes: [{ name: "Paiement test", amountInCents: 100, quantity: 1 }],
+    lignes: [{ name: "Paiement test", amountInCents: 10, quantity: 1 }],
   });
   await wc(`/orders/${cree.id}`, {
     method: "PUT",
@@ -653,6 +653,13 @@ function ticketUrl(order, item, ticket) {
   return `${SITE}/valid.html?d=${encodeTicket(payload)}`;
 }
 
+function euro(amount) {
+  const cents = Math.round(Number(amount) * 100);
+  const whole = Math.trunc(Math.abs(cents) / 100);
+  const frac = String(Math.abs(cents) % 100).padStart(2, "0");
+  return frac === "00" ? `${whole} €` : `${whole},${frac} €`;
+}
+
 function esc(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -737,7 +744,7 @@ export function htmlFacture(order) {
           <span style="display:block;margin-top:2px;color:#6b7280;font-size:13px;">${esc(ou)}</span>
         </td>
         <td align="right" valign="top" style="padding:12px 0 12px 12px;border-top:1px solid #eef0f3;white-space:nowrap;">×${item.qty}</td>
-        <td align="right" valign="top" style="padding:12px 0 12px 12px;border-top:1px solid #eef0f3;white-space:nowrap;">${item.price * item.qty} €</td>
+        <td align="right" valign="top" style="padding:12px 0 12px 12px;border-top:1px solid #eef0f3;white-space:nowrap;">${euro(item.price * item.qty)}</td>
       </tr>`;
     })
     .join("");
@@ -760,7 +767,7 @@ export function htmlFacture(order) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;border-top:2px solid #37003c;">
         <tr>
           <td style="padding-top:12px;font-size:18px;font-weight:800;">Total TTC</td>
-          <td align="right" style="padding-top:12px;font-size:18px;font-weight:800;">${order.total} €</td>
+          <td align="right" style="padding-top:12px;font-size:18px;font-weight:800;">${euro(order.total)}</td>
         </tr>
       </table>`,
   });

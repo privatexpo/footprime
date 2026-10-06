@@ -1,4 +1,11 @@
 (function () {
+  function euro(amount) {
+    const cents = Math.round(Number(amount) * 100);
+    const whole = Math.trunc(Math.abs(cents) / 100);
+    const frac = String(Math.abs(cents) % 100).padStart(2, "0");
+    return frac === "00" ? `${whole} €` : `${whole},${frac} €`;
+  }
+
   function escHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -21,7 +28,7 @@
           <p class="basket-line__meta">Prime Football · 1 place</p>
         </div>
         <div class="basket-line__end">
-          <p class="basket-line__price">1 €</p>
+          <p class="basket-line__price">${euro(item.price * item.qty)}</p>
           ${
             Number.isInteger(index)
               ? `<button type="button" class="basket-remove" data-remove="${index}">${escHtml(t("cart.remove"))}</button>`
@@ -46,7 +53,7 @@
         <p class="basket-line__meta">${escHtml(when)} · ${escHtml(item.category)} · ×${item.qty}${escHtml(side)}</p>
       </div>
       <div class="basket-line__end">
-        <p class="basket-line__price">${item.price * item.qty} €</p>
+        <p class="basket-line__price">${euro(item.price * item.qty)}</p>
         ${
           Number.isInteger(index)
             ? `<button type="button" class="basket-remove" data-remove="${index}">${escHtml(t("cart.remove"))}</button>`
@@ -78,11 +85,11 @@
       if (empty) empty.hidden = has;
       if (!has) {
         lines.innerHTML = "";
-        if (totalEl) totalEl.textContent = "0 €";
+        if (totalEl) totalEl.textContent = euro(0);
         return;
       }
       lines.innerHTML = cart.map((item) => cartLine(item)).join("");
-      if (totalEl) totalEl.textContent = `${cart.reduce((sum, item) => sum + item.price * item.qty, 0)} €`;
+      if (totalEl) totalEl.textContent = euro(cart.reduce((sum, item) => sum + item.price * item.qty, 0));
     }
 
     form.addEventListener("submit", async (event) => {
@@ -155,7 +162,7 @@
           title: "Paiement test",
           competition: "Prime Football",
           category: "Test",
-          price: 1,
+          price: 0.1,
           qty: 1,
         },
       ]);
@@ -203,13 +210,13 @@
       if (emptyNote) emptyNote.hidden = holdEnded;
       if (!has) {
         cartLines.innerHTML = "";
-        if (cartTotal) cartTotal.textContent = "0 €";
+        if (cartTotal) cartTotal.textContent = euro(0);
         if (holdEl) holdEl.hidden = true;
         return;
       }
       holdEnded = false;
       cartLines.innerHTML = cart.map(cartLine).join("");
-      if (cartTotal) cartTotal.textContent = `${cart.reduce((sum, item) => sum + item.price * item.qty, 0)} €`;
+      if (cartTotal) cartTotal.textContent = euro(cart.reduce((sum, item) => sum + item.price * item.qty, 0));
       if (holdEl) {
         holdEl.hidden = false;
         paintHoldTime();
