@@ -697,7 +697,7 @@ function coquille({ kicker, title, body }) {
   <tr><td style="padding:22px 22px 26px;">
     <h1 style="margin:0 0 12px;font-size:28px;line-height:1.15;letter-spacing:-0.4px;">${esc(title)}</h1>
     ${body}
-    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com<br>mail@primeleaguetickets.com</p>
+    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com<br>support@primeleaguetickets.com</p>
   </td></tr>
 </table>
 </td></tr></table></body></html>`;
@@ -821,16 +821,17 @@ export function htmlBillets(order) {
 
 async function envoyerMails(order) {
   const billets = dossierBillets(order);
+  const from = env("MAIL_FROM") || "Prime Football <support@primeleaguetickets.com>";
   await envoyerBrevo({
     to: order.email,
-    from: "Prime Football <facturation@primeleaguetickets.com>",
+    from,
     subject: `Facture ${order.ref}`,
     html: htmlFacture(order),
     key: `pf-${order.wooId}-facture`,
   });
   await envoyerBrevo({
     to: order.email,
-    from: env("MAIL_FROM") || "Prime Football <billets@primeleaguetickets.com>",
+    from,
     subject: `E-billets ${order.ref}`,
     html: htmlBillets(order),
     attachment: billets,
