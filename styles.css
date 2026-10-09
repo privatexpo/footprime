@@ -5329,3 +5329,32 @@ body.is-paying {
   0% { transform: translateX(-130%); }
   100% { transform: translateX(280%); }
 }
+
+.pf-mention {
+  margin: 22px 0 0;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.pf-mention a,
+.letter__notice a {
+  color: #e10600;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.letter__notice {
+  margin: 22px 0 0;
+  padding: 16px 18px;
+  background: #f4f7fb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.55;
+}

@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { deflateSync } from "node:zlib";
 import qrcode from "../../qrcode.js";
 import { logoPdf } from "./logo-pdf.js";
+import { secteurStade } from "../../stades.js";
 
 const SITE = "https://primeleaguetickets.com";
 
@@ -85,10 +86,39 @@ function idDeRef(code) {
   return { id: Number(m[1]), ticket: m[2] ? Number(m[2]) : null };
 }
 
-function places(qty) {
-  const row = 4 + Math.floor(Math.random() * 22);
-  const start = 1 + Math.floor(Math.random() * Math.max(1, 28 - qty));
-  return Array.from({ length: qty }, (_, i) => ({ row, seat: start + i }));
+function hashPositif(cle) {
+  let h = 0;
+  const valeur = String(cle);
+  for (let i = 0; i < valeur.length; i += 1) h = (h * 33 + valeur.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function places(qty, stade, categorie, graine) {
+  const n = Math.max(1, qty);
+  const h = hashPositif(`${graine}|${stade}|${categorie}`);
+  const secteur = secteurStade(stade, categorie) || {
+    tribune: "Latérale",
+    bloc: "1",
+    porte: "1",
+    rangMin: 8,
+    rangMax: 24,
+    siegeMax: 24,
+  };
+  const row = secteur.rangMin + (h % (secteur.rangMax - secteur.rangMin + 1));
+  let start = 1 + (h % Math.max(1, secteur.siegeMax - n));
+  if (start + n - 1 > secteur.siegeMax) start = Math.max(1, secteur.siegeMax - n + 1);
+  return Array.from({ length: n }, (_, i) => ({
+    row,
+    seat: start + i,
+    tribune: secteur.tribune,
+    bloc: secteur.bloc,
+    porte: secteur.porte,
+  }));
+}
+
+function textePlace(ticket) {
+  if (!ticket?.tribune) return `Rang ${ticket.row} · Place ${ticket.seat}`;
+  return `Tribune ${ticket.tribune} · Bloc ${ticket.bloc} · Rang ${ticket.row} · Place ${ticket.seat} · Porte ${ticket.porte}`;
 }
 
 const ATTENTE = "attente@primeleaguetickets.com";
@@ -197,7 +227,7 @@ export async function creerPaiement({ name, email, lines }) {
 
   const ref = refDe(cree.id);
   let n = 1;
-  const items = details.map((item) => ({
+  const items = details.map((item, index) => ({
     title: item.title,
     home: item.home,
     away: item.away,
@@ -211,10 +241,13 @@ export async function creerPaiement({ name, email, lines }) {
     price: item.prix,
     qty: item.qty,
     together: item.qty > 1,
-    tickets: places(item.qty).map((place) => ({
+    tickets: places(item.qty, item.stadium, item.categoryId, `${cree.id}|${index}`).map((place) => ({
       code: `${ref}-${n++}`,
       row: place.row,
       seat: place.seat,
+      tribune: place.tribune,
+      bloc: place.bloc,
+      porte: place.porte,
     })),
   }));
   const order = {
@@ -649,6 +682,9 @@ function ticketUrl(order, item, ticket) {
     h: item.kickoff || "",
     r: ticket.row,
     n: ticket.seat,
+    u: ticket.tribune || "",
+    b: ticket.bloc || "",
+    p: ticket.porte || "",
   };
   return `${SITE}/valid.html?d=${encodeTicket(payload)}`;
 }
@@ -704,7 +740,11 @@ function coquille({ kicker, title, body }) {
   <tr><td style="padding:22px 22px 26px;">
     <h1 style="margin:0 0 12px;font-size:28px;line-height:1.15;letter-spacing:-0.4px;">${esc(title)}</h1>
     ${body}
-    <p style="margin:22px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com<br>support@primeleaguetickets.com</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0 0;background:#f4f7fb;border:1px solid #e5e7eb;border-radius:12px;"><tr><td style="padding:14px 16px;text-align:center;font-size:13.5px;line-height:1.55;color:#1c2230;">
+      Un problème avec votre commande ou vos billets ? Écrivez-nous uniquement à <a href="mailto:support@primeleaguetickets.com" style="color:#e10600;font-weight:700;text-decoration:none;">support@primeleaguetickets.com</a>. C’est notre seule adresse officielle.<br>
+      Conservez vos e-billets pour vous seul. Ne les transmettez à personne, et ignorez toute demande reçue sur une autre adresse.
+    </td></tr></table>
+    <p style="margin:14px 0 0;color:#8d95a3;font-size:12px;line-height:1.45;">Prime Football · primeleaguetickets.com</p>
   </td></tr>
 </table>
 </td></tr></table></body></html>`;
@@ -776,7 +816,7 @@ export function htmlFacture(order) {
 function ficheBillet(order, item, ticket) {
   const url = ticketUrl(order, item, ticket);
   const d = new URL(url).searchParams.get("d");
-  const place = `Rang ${ticket.row} · Place ${ticket.seat}`;
+  const place = textePlace(ticket);
   const champs = [
     ["Date", quand(item)],
     item.stadium ? ["Stade", item.stadium] : null,
@@ -999,7 +1039,7 @@ export function pdfBillet(order, item, ticket, url) {
   const champs = [
     ["Date", when],
     item.stadium ? ["Stade", item.stadium] : null,
-    ["Place", `Rang ${ticket.row} · Place ${ticket.seat}`],
+    ["Place", textePlace(ticket)],
     ["Catégorie", item.category || ""],
   ].filter((champ) => champ && champ[1]);
   const W = 420;

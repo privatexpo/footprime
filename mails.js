@@ -79,7 +79,7 @@ function pdfSheet(order, item, ticket) {
   const face = typeof facesOf === "function" ? facesOf(item) : item;
   const when = typeof pfDate === "function" ? pfDate(item.date) : item.date;
   const kick = item.kickoff ? `${when} · ${item.kickoff}` : when;
-  const seat = t("order.seat", { row: ticket.row, seat: ticket.seat });
+  const seat = typeof seatText === "function" ? seatText(ticket) : t("order.seat", { row: ticket.row, seat: ticket.seat });
   return `<article class="pdf-sheet">
     <header>
       <img src="logos/prime-football.png" alt="Prime Football">
@@ -113,7 +113,8 @@ function letterShell({ from, subject, to, kicker, title, body }) {
     <div class="letter__body">
       <h1>${esc(title)}</h1>
       ${body}
-      <p class="letter__foot">Prime Football · primeleaguetickets.com<br>support@primeleaguetickets.com</p>
+      <p class="letter__notice">Un problème avec votre commande ou vos billets ? Écrivez-nous uniquement à <a href="mailto:support@primeleaguetickets.com">support@primeleaguetickets.com</a>. C’est notre seule adresse officielle. Conservez vos e-billets pour vous seul. Ne les transmettez à personne, et ignorez toute demande reçue sur une autre adresse.</p>
+      <p class="letter__foot">Prime Football · primeleaguetickets.com</p>
     </div>
   </article>`;
 }

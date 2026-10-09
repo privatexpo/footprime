@@ -139,6 +139,9 @@ function decodeTicket(raw) {
       h: clip(data.h, 12),
       r: Number(data.r),
       n: Number(data.n),
+      u: clip(data.u, 40),
+      b: clip(data.b, 24),
+      p: clip(data.p, 24),
     };
     if (!/^PF-\d{6}-\d+$/i.test(ticket.c) || !ticket.t || !ticket.d) return null;
     if (!Number.isInteger(ticket.r) || !Number.isInteger(ticket.n)) return null;
@@ -159,7 +162,24 @@ function ticketRecord(order, item, ticket) {
     h: item.kickoff || "",
     r: ticket.row,
     n: ticket.seat,
+    u: ticket.tribune || "",
+    b: ticket.bloc || "",
+    p: ticket.porte || "",
   };
+}
+
+function seatText(ticket) {
+  const row = ticket.row ?? ticket.r;
+  const seat = ticket.seat ?? ticket.n;
+  const tribune = ticket.tribune || ticket.u;
+  if (!tribune) return t("order.seat", { row, seat });
+  return t("order.place", {
+    tribune,
+    bloc: ticket.bloc || ticket.b || "",
+    row,
+    seat,
+    porte: ticket.porte || ticket.p || "",
+  });
 }
 
 function ticketUrl(order, item, ticket) {
@@ -175,7 +195,7 @@ function qrSvg(text) {
 }
 
 function ticketCard(order, item, ticket) {
-  const seat = t("order.seat", { row: ticket.row, seat: ticket.seat });
+  const seat = seatText(ticket);
   const where = [item.competition, item.stadium].filter(Boolean).join(" · ");
   const when = [item.date, item.kickoff].filter(Boolean).join(" · ");
   const test = item.competition === "TEST";
@@ -242,7 +262,7 @@ function paintGate(root) {
 
   const date = typeof pfDate === "function" ? pfDate(data.d) : data.d;
   const when = data.h ? `${date} · ${data.h}` : date;
-  const seat = t("order.seat", { row: data.r, seat: data.n });
+  const seat = seatText(data);
   root.innerHTML = `
     <div class="gate-glow" aria-hidden="true"></div>
     <div class="gate-badge" aria-hidden="true">
