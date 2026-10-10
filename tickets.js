@@ -1,4 +1,4 @@
-const SITE_ORIGIN = "https://primeleaguetickets.com";
+const SITE_ORIGIN = "https://primeleaguepass.com";
 const ORDERS_KEY = "prime-football-orders";
 
 function loadOrders() {

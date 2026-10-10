@@ -32,7 +32,7 @@ function invoiceLetter(order) {
     })
     .join("");
   return letterShell({
-    from: "support@primeleaguetickets.com",
+    from: "support@primeleaguepass.com",
     subject: `${t("mail.invoiceKicker")} ${order.ref}`,
     to: order.email,
     kicker: t("mail.invoiceKicker"),
@@ -60,7 +60,7 @@ function ticketsLetter(order) {
   const count = order.items.reduce((sum, item) => sum + item.tickets.length, 0);
   const attached = count > 1 ? t("mail.attached", { n: count }) : t("mail.attachedOne");
   return letterShell({
-    from: "support@primeleaguetickets.com",
+    from: "support@primeleaguepass.com",
     subject: `${t("mail.ticketsKicker")} ${order.ref}`,
     to: order.email,
     kicker: t("mail.ticketsKicker"),
@@ -113,8 +113,8 @@ function letterShell({ from, subject, to, kicker, title, body }) {
     <div class="letter__body">
       <h1>${esc(title)}</h1>
       ${body}
-      <p class="letter__notice">Un problème avec votre commande ou vos billets ? Écrivez-nous uniquement à <a href="mailto:support@primeleaguetickets.com">support@primeleaguetickets.com</a>. C’est notre seule adresse officielle. Conservez vos e-billets pour vous seul. Ne les transmettez à personne, et ignorez toute demande reçue sur une autre adresse.</p>
-      <p class="letter__foot">Prime Football · primeleaguetickets.com</p>
+      <p class="letter__notice">Un problème avec votre commande ou vos billets ? Écrivez-nous uniquement à <a href="mailto:support@primeleaguepass.com">support@primeleaguepass.com</a>. C’est notre seule adresse officielle. Conservez vos e-billets pour vous seul. Ne les transmettez à personne, et ignorez toute demande reçue sur une autre adresse.</p>
+      <p class="letter__foot">Prime Football · primeleaguepass.com</p>
     </div>
   </article>`;
 }
