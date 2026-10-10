@@ -356,7 +356,7 @@ export async function creerPaiementTest({ token }) {
 async function sessionByteqs(input) {
   const secret = env("BYTEQS_SECRET_KEY");
   const publishable = env("BYTEQS_PUBLISHABLE_KEY");
-  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeleaguepass.com").replace(/\/+$/, "");
+  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeleaguetickets.com").replace(/\/+$/, "");
   const cle = secret || publishable;
   if (!cle) throw new ShopError("Le paiement n'est pas configuré.", 500);
   const corps = {
@@ -574,7 +574,7 @@ async function lireEmail(url, cle) {
 
 async function emailClientByteqs(...pistes) {
   const cle = env("BYTEQS_SECRET_KEY") || env("BYTEQS_PUBLISHABLE_KEY");
-  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeleaguepass.com").replace(/\/+$/, "");
+  const origin = (env("BYTEQS_CHECKOUT_ORIGIN") || "https://pay.primeleaguetickets.com").replace(/\/+$/, "");
   if (!cle) return "";
   const urls = new Set();
   for (const brut of pistes.map((piste) => String(piste || "").trim()).filter((piste) => piste && !piste.includes("{"))) {
