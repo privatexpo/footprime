@@ -30,7 +30,7 @@
       </a>
       <a href="billets.html">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5A2 2 0 0 1 6.5 6.5h11a2 2 0 0 1 2 2v1.8a1.7 1.7 0 0 0 0 3.4v1.8a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.8a1.7 1.7 0 0 0 0-3.4V8.5z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-        <span data-i18n="footer.tickets">Mes billets</span>
+        <span data-i18n="footer.tickets">Mon compte</span>
       </a>
       <a href="contact.html">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 7.5 12 13l8-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -48,7 +48,7 @@
             <h2 data-i18n="footer.connect">Contact</h2>
             <ul>
               <li><a class="footer-link" href="contact.html" data-i18n="footer.contact">Contact</a></li>
-              <li><a class="footer-link" href="billets.html" data-i18n="footer.tickets">Mes billets</a></li>
+              <li><a class="footer-link" href="billets.html" data-i18n="footer.tickets">Mon compte</a></li>
             </ul>
           </section>
           <section>

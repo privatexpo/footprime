@@ -4672,6 +4672,40 @@ body:not([data-competition]) .page-header__photo--pl {
   text-align: left;
 }
 
+.compte-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #37003c;
+}
+
+.compte-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1.25rem;
+}
+
+.compte-bar[hidden],
+.lookup-form[hidden] {
+  display: none !important;
+}
+
+.compte-bar p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.compte-bar .btn-outline {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+}
+
 .mail-links {
   flex-basis: 100%;
   display: flex;

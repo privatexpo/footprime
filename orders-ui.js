@@ -254,8 +254,52 @@
 
   const lookup = document.getElementById("lookup-form");
   const lookupRoot = document.getElementById("lookup-root");
+  const compteBar = document.getElementById("compte-bar");
+  const compteUser = document.getElementById("compte-user");
+  const compteLogout = document.getElementById("compte-logout");
+  const compteTitle = document.getElementById("compte-title");
+  const compteLead = document.getElementById("compte-lead");
   if (lookup && lookupRoot) {
-    async function show(email, code) {
+    let sessionEmail = "";
+    let sessionOrders = [];
+
+    function paintCompte(email, orders) {
+      sessionEmail = email || "";
+      sessionOrders = Array.isArray(orders) ? orders : [];
+      const connecte = Boolean(sessionEmail);
+      lookup.hidden = connecte;
+      if (compteBar) compteBar.hidden = !connecte;
+      if (compteUser && connecte) {
+        compteUser.innerHTML = `${t("order.signedIn")} <strong>${sessionEmail}</strong>`;
+      }
+      if (compteTitle) compteTitle.textContent = connecte ? t("order.ticketsTitle") : t("order.find");
+      if (compteLead) {
+        compteLead.textContent = connecte ? t("order.ticketsLead") : t("order.findLead");
+        compteLead.hidden = connecte;
+      }
+      lookupRoot.innerHTML = connecte
+        ? typeof ordersBlock === "function"
+          ? ordersBlock(sessionOrders)
+          : sessionOrders.map((order) => orderBlock(order)).join("")
+        : "";
+    }
+
+    async function chargerSession() {
+      try {
+        const res = await fetch("/api/billets", { credentials: "same-origin" });
+        const payload = await res.json().catch(() => ({}));
+        if (payload.ok && payload.email) {
+          paintCompte(payload.email, payload.orders);
+          return true;
+        }
+      } catch {
+        /* hors ligne : formulaire de connexion */
+      }
+      paintCompte("", []);
+      return false;
+    }
+
+    async function connecter(email, code) {
       if (!String(email || "").trim() || !String(code || "").trim()) {
         lookupRoot.innerHTML = "";
         return;
@@ -263,33 +307,60 @@
       try {
         const res = await fetch("/api/billets", {
           method: "POST",
+          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, code }),
         });
         const payload = await res.json().catch(() => ({}));
-        if (payload.order) {
-          lookupRoot.innerHTML = orderBlock(payload.order);
-          return;
-        }
         if (payload.pending) {
           lookupRoot.innerHTML = `<p class="legal-note">Le paiement de cette commande n'est pas encore confirmé.</p>`;
+          return;
+        }
+        if (payload.ok && payload.email) {
+          paintCompte(payload.email, payload.orders);
+          return;
+        }
+        if (payload.order) {
+          paintCompte(email, [payload.order]);
           return;
         }
       } catch {
         /* la recherche locale reste disponible */
       }
       const found = findByMailAndCode(email, code);
-      lookupRoot.innerHTML = found ? orderBlock(found.order) : `<p class="legal-note">${t("order.none")}</p>`;
+      if (found) {
+        paintCompte(email, [found.order]);
+        return;
+      }
+      paintCompte("", []);
+      lookupRoot.innerHTML = `<p class="legal-note">${t("order.none")}</p>`;
     }
+
     lookup.addEventListener("submit", (event) => {
       event.preventDefault();
       const data = new FormData(lookup);
-      show(data.get("email"), data.get("code"));
+      connecter(data.get("email"), data.get("code"));
     });
+    if (compteLogout) {
+      compteLogout.addEventListener("click", async () => {
+        try {
+          await fetch("/api/billets", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "logout" }),
+          });
+        } catch {
+          /* ignore */
+        }
+        lookup.reset();
+        paintCompte("", []);
+      });
+    }
     window.addEventListener("pf-lang", () => {
-      const data = new FormData(lookup);
-      if (lookupRoot.innerHTML) show(data.get("email"), data.get("code"));
+      if (sessionEmail) paintCompte(sessionEmail, sessionOrders);
     });
+    chargerSession();
   }
 
   const orderRoot = document.getElementById("order-root");

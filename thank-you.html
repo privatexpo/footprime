@@ -62,8 +62,8 @@
         return false;
       }
       lead.textContent = payload.order.test
-        ? "Paiement test confirmé. Tes billets sont sur Mes billets. Le code part par e-mail."
-        : "Paiement confirmé. Tes billets sont sur Mes billets. Le code d'accès part par e-mail.";
+        ? "Paiement test confirmé. Tes billets sont dans ton espace client. Le code d'accès part par e-mail."
+        : "Paiement confirmé. Tes billets sont dans ton espace client. Le code d'accès part par e-mail.";
       root.innerHTML = orderBlock(payload.order);
       viderPanier();
       return true;

@@ -1,10 +1,12 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { deflateSync } from "node:zlib";
 import qrcode from "../../qrcode.js";
 import { logoPdf } from "./logo-pdf.js";
 import { secteurStade } from "../../stades.js";
 
 const SITE = "https://primeleaguepass.com";
+const COOKIE_COMPTE = "pf_compte";
+const DUREE_SESSION_SEC = 60 * 60 * 24 * 30;
 
 export class ShopError extends Error {
   constructor(message, status = 400) {
@@ -72,6 +74,200 @@ function codesEgaux(saisi, attendu) {
   const b = String(attendu || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (a.length !== 8 || b.length !== 8) return false;
   return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
+function normaliserMotDePasse(mot) {
+  return String(mot || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function genererMotDePasse() {
+  const bytes = randomBytes(8);
+  let brut = "";
+  for (let i = 0; i < 8; i += 1) brut += CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length];
+  return `${brut.slice(0, 4)}-${brut.slice(4)}`;
+}
+
+function hasherMotDePasse(mot) {
+  const sel = randomBytes(16);
+  const hash = scryptSync(normaliserMotDePasse(mot), sel, 32);
+  return `scrypt$${sel.toString("base64url")}$${hash.toString("base64url")}`;
+}
+
+function verifierMotDePasse(mot, stocke) {
+  const [algo, sel, hash] = String(stocke || "").split("$");
+  if (algo !== "scrypt" || !sel || !hash) return false;
+  const calc = scryptSync(normaliserMotDePasse(mot), Buffer.from(sel, "base64url"), 32);
+  const attendu = Buffer.from(hash, "base64url");
+  if (calc.length !== attendu.length) return false;
+  return timingSafeEqual(calc, attendu);
+}
+
+function secretSession() {
+  return env("ACCOUNT_SECRET") || env("BYTEQS_WEBHOOK_SECRET") || env("BYTEQS_SECRET_KEY") || "prime-espace-client";
+}
+
+function signerSession(corps) {
+  return createHmac("sha256", secretSession()).update(corps).digest("base64url");
+}
+
+function creerJeton(email) {
+  const exp = Date.now() + DUREE_SESSION_SEC * 1000;
+  const corps = Buffer.from(JSON.stringify({ email: String(email).trim().toLowerCase(), exp })).toString("base64url");
+  return `${corps}.${signerSession(corps)}`;
+}
+
+function lireJeton(jeton) {
+  const [corps, sig] = String(jeton || "").split(".");
+  if (!corps || !sig) return null;
+  const attendu = signerSession(corps);
+  const a = Buffer.from(sig);
+  const b = Buffer.from(attendu);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(corps, "base64url").toString("utf8"));
+    const email = String(data.email || "")
+      .trim()
+      .toLowerCase();
+    const exp = Number(data.exp);
+    if (!email.includes("@") || !Number.isFinite(exp) || exp < Date.now()) return null;
+    return { email, exp };
+  } catch {
+    return null;
+  }
+}
+
+export function cookieCompte(jeton) {
+  const base = `${COOKIE_COMPTE}=${jeton}; HttpOnly; Path=/; Max-Age=${DUREE_SESSION_SEC}; SameSite=Lax`;
+  return process.env.NODE_ENV === "development" ? base : `${base}; Secure`;
+}
+
+export function cookieCompteVide() {
+  const base = `${COOKIE_COMPTE}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax`;
+  return process.env.NODE_ENV === "development" ? base : `${base}; Secure`;
+}
+
+export function sessionDepuisCookie(header) {
+  const brut = String(header || "");
+  const m = brut.match(/(?:^|;\s*)pf_compte=([^;]+)/);
+  if (!m) return null;
+  return lireJeton(decodeURIComponent(m[1]));
+}
+
+async function commandesParEmail(email) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  if (!mail) return [];
+  const qs = new URLSearchParams({
+    search: mail,
+    status: "any",
+    per_page: "40",
+    orderby: "date",
+    order: "desc",
+  });
+  let lot = [];
+  try {
+    lot = await wc(`/orders?${qs}`);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(lot)) return [];
+  return lot.filter((wcOrder) => String(wcOrder.billing?.email || "").toLowerCase() === mail);
+}
+
+async function lireHashCompte(email) {
+  const commandes = await commandesParEmail(email);
+  for (const wcOrder of commandes) {
+    const hash = meta(wcOrder.meta_data, "_pf_compte_mdp");
+    if (hash.startsWith("scrypt$")) return hash;
+  }
+  return "";
+}
+
+async function ecrireHashCompte(email, hash) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  if (!mail || !hash.startsWith("scrypt$")) return;
+  const commandes = await commandesParEmail(mail);
+  const cible = commandes.find((wcOrder) => meta(wcOrder.meta_data, "_pf_compte_coffre") === "oui") || commandes.find((wcOrder) => payee(wcOrder)) || commandes[0];
+  if (cible) {
+    await wc(`/orders/${cible.id}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        meta_data: [
+          { key: "_pf_compte_coffre", value: "oui" },
+          { key: "_pf_compte_mdp", value: hash },
+        ],
+      }),
+    });
+    return;
+  }
+  await wc("/orders", {
+    method: "POST",
+    body: JSON.stringify({
+      status: "cancelled",
+      set_paid: false,
+      currency: "EUR",
+      billing: { email: mail },
+      fee_lines: [{ name: "Espace client", total: "0.00", tax_status: "none" }],
+      meta_data: [
+        { key: "_pf_compte_coffre", value: "oui" },
+        { key: "_pf_compte_mdp", value: hash },
+      ],
+    }),
+  });
+}
+
+async function assurerAcces(email, codeFallback) {
+  const mail = emailUtile(email);
+  if (!mail) return { email: mail };
+  const hash = await lireHashCompte(mail);
+  if (hash) return { email: mail };
+  const code = codeFallback || genererMotDePasse();
+  await ecrireHashCompte(mail, hasherMotDePasse(code));
+  return { email: mail, code };
+}
+
+export async function billetsDuCompte(email) {
+  const lot = await commandesParEmail(email);
+  const orders = [];
+  for (const wcOrder of lot) {
+    const order = commandeDepuis(wcOrder);
+    const test = meta(wcOrder.meta_data, "_pf_test") === "1" || order?.test;
+    if (!order || (!payee(wcOrder) && !test)) continue;
+    if (meta(wcOrder.meta_data, "_pf_compte_coffre") === "oui" && !(order.items || []).length) continue;
+    orders.push(avecCode(order, wcOrder));
+  }
+  return orders;
+}
+
+export async function connecterCompte(email, code) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const saisi = String(code || "").trim();
+  if (!mail.includes("@") || mail.startsWith("attente@") || normaliserMotDePasse(saisi).length < 8) {
+    return { ok: false };
+  }
+  const hash = await lireHashCompte(mail);
+  if (hash && verifierMotDePasse(saisi, hash)) {
+    return { ok: true, email: mail, orders: await billetsDuCompte(mail), jeton: creerJeton(mail) };
+  }
+  const trouve = await retrouver(mail, saisi);
+  if (trouve?.pending) return { ok: false, pending: true };
+  if (!trouve?.order) return { ok: false };
+  if (!hash) await ecrireHashCompte(mail, hasherMotDePasse(saisi));
+  return { ok: true, email: mail, orders: await billetsDuCompte(mail), jeton: creerJeton(mail) };
+}
+
+export async function sessionCompte(header) {
+  const session = sessionDepuisCookie(header);
+  if (!session) return { ok: false };
+  return { ok: true, email: session.email, orders: await billetsDuCompte(session.email) };
 }
 
 function avecCode(order, wcOrder) {
@@ -425,6 +621,9 @@ export async function livrerTest(wooId, indices = []) {
   }
   if (!emailUtile(order.email)) return;
   order = avecCode(order, wcOrder);
+  const acces = await assurerAcces(order.email, order.code);
+  if (acces.code) order = { ...order, code: acces.code };
+  else order = { ...order, code: "" };
   await envoyerMails(order);
   await wc(`/orders/${wcOrder.id}`, {
     method: "PUT",
@@ -653,6 +852,9 @@ export async function paiementRecu(corps) {
   if (!order || !emailUtile(order.email)) return { ok: true, mail: "sans-email" };
   if (meta(wcOrder.meta_data, "_pf_mail_brevo") === "oui") return { ok: true, deja: true };
   order = avecCode(order, wcOrder);
+  const acces = await assurerAcces(order.email, order.code);
+  if (acces.code) order = { ...order, code: acces.code };
+  else order = { ...order, code: "" };
   await envoyerMails(order);
   await wc(`/orders/${wcOrder.id}`, {
     method: "PUT",
@@ -776,13 +978,16 @@ function quand(item) {
 
 function blocMesBillets(order) {
   const url = `${SITE}/billets.html`;
+  const code = order.code
+    ? `<p style="margin:8px 0 0;color:#ffffff;font-size:15px;line-height:1.45;">Connecte-toi à ton espace client avec l'e-mail de la commande et ce code.</p>
+        <p style="margin:10px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:3px;font-family:Menlo,Consolas,monospace;">${esc(order.code)}</p>`
+    : `<p style="margin:8px 0 0;color:#ffffff;font-size:15px;line-height:1.45;">Tes billets sont dans ton espace client. Connecte-toi avec l'e-mail de la commande et ton code d'accès déjà reçu.</p>`;
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#140018" style="background:#140018;border-radius:14px;margin:0 0 16px;">
       <tr><td style="padding:16px;">
-        <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">TES BILLETS SONT SUR MES BILLETS</p>
-        <p style="margin:8px 0 0;color:#ffffff;font-size:15px;line-height:1.45;">Connecte-toi avec l'e-mail de la commande et ce code.</p>
-        <p style="margin:10px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:3px;font-family:Menlo,Consolas,monospace;">${esc(order.code)}</p>
+        <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">ESPACE CLIENT</p>
+        ${code}
         <p style="margin:14px 0 0;text-align:center;">
-          <a href="${esc(url)}" style="display:inline-block;background:#e10600;color:#ffffff;font-size:14px;font-weight:800;text-decoration:none;padding:10px 16px;border-radius:8px;">Ouvrir Mes billets</a>
+          <a href="${esc(url)}" style="display:inline-block;background:#e10600;color:#ffffff;font-size:14px;font-weight:800;text-decoration:none;padding:10px 16px;border-radius:8px;">Ouvrir mon espace client</a>
         </p>
       </td></tr>
     </table>`;
@@ -806,7 +1011,7 @@ export function htmlFacture(order) {
     kicker: "FACTURE",
     title: "Paiement confirmé",
     body: `<p style="margin:0 0 12px;line-height:1.5;">${bonjour(order)}</p>
-      <p style="margin:0 0 16px;line-height:1.5;">Le paiement est confirmé. Tes billets sont sur Mes billets. Le code d'accès est ci-dessous.</p>
+      <p style="margin:0 0 16px;line-height:1.5;">Le paiement est confirmé. Tes billets sont dans ton espace client.${order.code ? " Le code d'accès est ci-dessous." : " Utilise ton code d'accès déjà reçu."}</p>
       ${blocMesBillets(order)}
       ${puce("N° DE FACTURE", order.ref)}
       ${puce("DATE", dateLongue(order.created) || "—")}
@@ -856,15 +1061,15 @@ function ficheBillet(order, item, ticket) {
 
 export function htmlBillets(order) {
   const lead = order.test
-    ? "Tes billets sont sur Mes billets. Billet de test : aucune place n'est vendue."
-    : "Tes billets sont sur Mes billets. Présente chaque QR code à l'entrée du stade.";
+    ? "Tes billets sont dans ton espace client. Billet de test : aucune place n'est vendue."
+    : "Tes billets sont dans ton espace client. Présente chaque QR code à l'entrée du stade.";
   return coquille({
-    kicker: "MES BILLETS",
-    title: "Tes billets sont sur Mes billets",
+    kicker: "ESPACE CLIENT",
+    title: "Tes billets sont dans ton espace client",
     body: `<p style="margin:0 0 12px;line-height:1.5;">${bonjour(order)}</p>
       <p style="margin:0 0 16px;line-height:1.5;">${lead}</p>
       ${blocMesBillets(order)}
-      <p style="margin:0;color:#4b5563;font-size:15px;line-height:1.45;">Avec l'e-mail de cette commande et ce code, ouvre Mes billets pour voir tes QR.</p>`,
+      <p style="margin:0;color:#4b5563;font-size:15px;line-height:1.45;">Ouvre ton espace client pour voir tes QR.</p>`,
   });
 }
 
@@ -873,7 +1078,7 @@ async function envoyerMails(order) {
   await envoyerBrevo({
     to: order.email,
     from,
-    subject: `Confirmation ${order.ref} — tes billets sont sur Mes billets`,
+    subject: `Confirmation ${order.ref} — tes billets sont dans ton espace client`,
     html: htmlFacture(order),
     key: `pf-${order.wooId}-facture`,
   });
