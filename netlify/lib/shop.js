@@ -255,19 +255,294 @@ export async function connecterCompte(email, code) {
   }
   const hash = await lireHashCompte(mail);
   if (hash && verifierMotDePasse(saisi, hash)) {
-    return { ok: true, email: mail, orders: await billetsDuCompte(mail), jeton: creerJeton(mail) };
+    const resume = await resumeCompte(mail);
+    return { ...resume, jeton: creerJeton(mail) };
   }
   const trouve = await retrouver(mail, saisi);
   if (trouve?.pending) return { ok: false, pending: true };
   if (!trouve?.order) return { ok: false };
   if (!hash) await ecrireHashCompte(mail, hasherMotDePasse(saisi));
-  return { ok: true, email: mail, orders: await billetsDuCompte(mail), jeton: creerJeton(mail) };
+  const resume = await resumeCompte(mail);
+  return { ...resume, jeton: creerJeton(mail) };
+}
+
+function lireDemandesMeta(wcOrder) {
+  const brut = meta(wcOrder.meta_data, "_pf_demandes");
+  if (!brut.trim()) return [];
+  try {
+    const liste = JSON.parse(brut);
+    return Array.isArray(liste) ? liste.filter((d) => d && typeof d.id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+async function ecrireDemandesMeta(wcOrder, liste) {
+  await wc(`/orders/${wcOrder.id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      meta_data: [{ key: "_pf_demandes", value: JSON.stringify(liste.slice(-40)) }],
+    }),
+  });
+}
+
+function libelleDemande(type) {
+  return (
+    {
+      annulation: "Annulation / remboursement",
+      echange: "Modification de réservation",
+      renvoi: "Billet non reçu",
+      message: "Message au support",
+      upsell: "Complément de commande",
+    }[type] || "Demande"
+  );
+}
+
+function libelleStatut(status) {
+  const map = {
+    processing: "Confirmée",
+    completed: "Terminée",
+    pending: "En attente",
+    "on-hold": "En attente",
+    cancelled: "Annulée",
+    refunded: "Remboursée",
+    failed: "Échouée",
+  };
+  return map[String(status || "").toLowerCase()] || String(status || "—");
+}
+
+export async function commandesDuCompte(email) {
+  const lot = await commandesParEmail(email);
+  const commandes = [];
+  for (const wcOrder of lot) {
+    if (meta(wcOrder.meta_data, "_pf_compte_coffre") === "oui" && !(commandeDepuis(wcOrder)?.items || []).length) continue;
+    const order = commandeDepuis(wcOrder);
+    if (!order) continue;
+    commandes.push({
+      id: wcOrder.id,
+      ref: order.ref,
+      date: order.created || wcOrder.date_created || "",
+      total: order.total,
+      statut: libelleStatut(wcOrder.status),
+      status: wcOrder.status,
+      payee: payee(wcOrder) || meta(wcOrder.meta_data, "_pf_test") === "1",
+      items: (order.items || []).map((item) => ({
+        title: item.title,
+        qty: item.qty,
+        category: item.category,
+        date: item.date,
+      })),
+    });
+  }
+  return commandes;
+}
+
+export async function demandesDuCompte(email) {
+  const lot = await commandesParEmail(email);
+  const out = [];
+  for (const wcOrder of lot) {
+    const order = commandeDepuis(wcOrder);
+    for (const demande of lireDemandesMeta(wcOrder)) {
+      out.push({
+        ...demande,
+        numero: order?.ref || `PF-${wcOrder.id}`,
+        typeLabel: libelleDemande(demande.type),
+      });
+    }
+  }
+  out.sort((a, b) => String(b.creeLe || "").localeCompare(String(a.creeLe || "")));
+  return out;
+}
+
+export async function profilDuCompte(email) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const lot = await commandesParEmail(mail);
+  const payees = lot.filter((wcOrder) => payee(wcOrder) || meta(wcOrder.meta_data, "_pf_test") === "1");
+  const source = payees[0] || lot[0];
+  const billing = source?.billing || {};
+  const stocke = source ? meta(source.meta_data, "_pf_profil") : "";
+  let profil = {};
+  if (stocke) {
+    try {
+      profil = JSON.parse(stocke) || {};
+    } catch {
+      profil = {};
+    }
+  }
+  return {
+    email: mail,
+    prenom: String(profil.prenom || billing.first_name || ""),
+    nom: String(profil.nom || billing.last_name || ""),
+    telephone: String(profil.telephone || billing.phone || ""),
+    adresse: String(profil.adresse || billing.address_1 || ""),
+    codePostal: String(profil.codePostal || billing.postcode || ""),
+    ville: String(profil.ville || billing.city || ""),
+    pays: String(profil.pays || billing.country || "FR"),
+  };
+}
+
+async function avisBoutique({ sujet, html, key }) {
+  const to = env("MAIL_SUPPORT") || env("MAIL_FROM")?.match(/<([^>]+)>/)?.[1] || `support@${new URL(SITE).hostname}`;
+  const from = env("MAIL_FROM") || `Prime Football <support@${new URL(SITE).hostname}>`;
+  await envoyerBrevo({
+    to,
+    from,
+    subject: sujet,
+    html,
+    key,
+  });
+}
+
+export async function enregistrerProfil(email, champs) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const lot = await commandesParEmail(mail);
+  const cible = lot.find((wcOrder) => payee(wcOrder)) || lot[0];
+  if (!cible) return { ok: false, message: "Aucune commande liée à ce compte." };
+  const profil = {
+    prenom: String(champs.prenom || "").trim().slice(0, 80),
+    nom: String(champs.nom || "").trim().slice(0, 80),
+    telephone: String(champs.telephone || "").trim().slice(0, 40),
+    adresse: String(champs.adresse || "").trim().slice(0, 160),
+    codePostal: String(champs.codePostal || "").trim().slice(0, 20),
+    ville: String(champs.ville || "").trim().slice(0, 80),
+    pays: String(champs.pays || "FR").trim().slice(0, 2).toUpperCase() || "FR",
+  };
+  await wc(`/orders/${cible.id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      billing: {
+        ...cible.billing,
+        email: mail,
+        first_name: profil.prenom,
+        last_name: profil.nom,
+        phone: profil.telephone,
+        address_1: profil.adresse,
+        postcode: profil.codePostal,
+        city: profil.ville,
+        country: profil.pays,
+      },
+      meta_data: [{ key: "_pf_profil", value: JSON.stringify(profil) }],
+    }),
+  });
+  return { ok: true, profil: { email: mail, ...profil } };
+}
+
+export async function poserDemandeCompte(email, { type, resume, numero }) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const lot = await commandesParEmail(mail);
+  let cible =
+    (numero && lot.find((wcOrder) => refDe(wcOrder.id) === String(numero).toUpperCase() || String(wcOrder.id) === String(numero))) ||
+    lot.find((wcOrder) => payee(wcOrder)) ||
+    lot[0];
+  if (!cible) return { ok: false, message: "Aucune commande pour cette demande." };
+  const demande = {
+    id: `d-${Date.now()}-${Math.floor(Math.random() * 999)}`,
+    type: String(type || "message"),
+    statut: "en_cours",
+    creeLe: new Date().toISOString(),
+    resume: String(resume || "").trim().slice(0, 500) || libelleDemande(type),
+  };
+  await ecrireDemandesMeta(cible, [...lireDemandesMeta(cible), demande]);
+  const order = commandeDepuis(cible);
+  await avisBoutique({
+    sujet: `[Espace client] ${libelleDemande(demande.type)} — ${order?.ref || cible.id}`,
+    html: `<p>Client : ${esc(mail)}</p><p>Commande : ${esc(order?.ref || String(cible.id))}</p><p>Type : ${esc(libelleDemande(demande.type))}</p><p>${esc(demande.resume)}</p>`,
+    key: `pf-demande-${demande.id}`,
+  }).catch(() => undefined);
+  return { ok: true, demande: { ...demande, numero: order?.ref || `PF-${cible.id}`, typeLabel: libelleDemande(demande.type) } };
+}
+
+export async function renvoyerBilletsCompte(email, numero) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const orders = await billetsDuCompte(mail);
+  const order = orders.find((entry) => entry.ref === String(numero || "").toUpperCase()) || orders[0];
+  if (!order) return { ok: false, message: "Aucune commande payée." };
+  await envoyerMails({ ...order, code: "" });
+  await poserDemandeCompte(mail, {
+    type: "renvoi",
+    resume: `Rappel envoyé pour ${order.ref}`,
+    numero: order.ref,
+  });
+  return { ok: true, ref: order.ref };
+}
+
+export async function changerCodeCompte(email, actuel, nouveau) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const a = String(actuel || "").trim();
+  const n = String(nouveau || "").trim();
+  if (normaliserMotDePasse(n).length < 8) return { ok: false, message: "Le nouveau code doit contenir au moins 8 caractères." };
+  const hash = await lireHashCompte(mail);
+  let ok = false;
+  if (hash && verifierMotDePasse(a, hash)) ok = true;
+  else {
+    const trouve = await retrouver(mail, a);
+    ok = Boolean(trouve?.order);
+  }
+  if (!ok) return { ok: false, message: "Code actuel incorrect." };
+  await ecrireHashCompte(mail, hasherMotDePasse(n));
+  return { ok: true };
+}
+
+export async function pdfBilletCompte(email, ticketCode) {
+  const orders = await billetsDuCompte(email);
+  const key = String(ticketCode || "")
+    .trim()
+    .toUpperCase();
+  for (const order of orders) {
+    for (const item of order.items || []) {
+      const ticket = (item.tickets || []).find((entry) => String(entry.code).toUpperCase() === key);
+      if (!ticket) continue;
+      const url = ticketUrl(order, item, ticket);
+      const pdf = pdfBillet(order, item, ticket, url);
+      return { ok: true, filename: `${ticket.code}.pdf`, pdf: Buffer.from(pdf).toString("base64") };
+    }
+  }
+  return { ok: false };
+}
+
+function compterBillets(orders) {
+  return (orders || []).reduce((sum, order) => sum + (order.items || []).reduce((n, item) => n + (item.tickets || []).length, 0), 0);
+}
+
+export async function resumeCompte(email) {
+  const mail = String(email || "")
+    .trim()
+    .toLowerCase();
+  const [orders, commandes, demandes, profil] = await Promise.all([
+    billetsDuCompte(mail),
+    commandesDuCompte(mail),
+    demandesDuCompte(mail),
+    profilDuCompte(mail),
+  ]);
+  return {
+    ok: true,
+    email: mail,
+    orders,
+    commandes,
+    demandes,
+    profil,
+    stats: {
+      billets: compterBillets(orders),
+      commandes: commandes.length,
+      demandes: demandes.filter((d) => d.statut === "en_cours").length,
+    },
+  };
 }
 
 export async function sessionCompte(header) {
   const session = sessionDepuisCookie(header);
   if (!session) return { ok: false };
-  return { ok: true, email: session.email, orders: await billetsDuCompte(session.email) };
+  return resumeCompte(session.email);
 }
 
 function avecCode(order, wcOrder) {

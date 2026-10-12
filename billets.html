@@ -8,16 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=113" />
+  <link rel="stylesheet" href="styles.css?v=114" />
 </head>
 <body>
   <div id="chrome-top"></div>
   <main id="page-main" class="page-doc">
     <div class="shell">
-      <article class="legal-content lookup-page compte-page">
+      <article class="legal-content lookup-page compte-page" id="compte-login">
         <p class="compte-kicker" data-i18n="order.kicker">Espace client</p>
-        <h1 id="compte-title" data-i18n="order.find">Mon compte</h1>
-        <p class="legal-content__lead" id="compte-lead" data-i18n="order.findLead">Le code d’accès arrive par e-mail. Tes billets sont dans ton espace client.</p>
+        <h1 data-i18n="order.find">Mon compte</h1>
+        <p class="legal-content__lead" data-i18n="order.findLead">Le code d’accès arrive par e-mail. Tes billets sont dans ton espace client.</p>
         <form class="lookup-form lookup-form--stack" id="lookup-form">
           <label>
             <span data-i18n="checkout.email">E-mail</span>
@@ -29,17 +29,55 @@
           </label>
           <button type="submit" class="btn-primary" data-i18n="order.search">Se connecter</button>
         </form>
-        <div id="compte-bar" class="compte-bar" hidden>
-          <p id="compte-user"></p>
-          <button type="button" class="btn-outline" id="compte-logout" data-i18n="order.logout">Déconnexion</button>
-        </div>
-        <div id="lookup-root"></div>
+        <div id="lookup-msg"></div>
         <p class="pf-mention">
           <span data-i18n="order.problemBefore">Un problème avec votre commande ou vos billets ? Écrivez-nous uniquement à</span>
           <a href="mailto:support@primeleaguepass.com">support@primeleaguepass.com</a>.
           <span data-i18n="order.problemAfter">C’est notre seule adresse officielle. Conservez vos e-billets pour vous seul. Ne les transmettez à personne, et ignorez toute demande reçue sur une autre adresse.</span>
         </p>
       </article>
+
+      <div class="cp" id="compte-espace" hidden>
+        <aside class="cp-menu" id="cp-menu">
+          <div class="cp-menu__tete">
+            <span class="cp-menu__initiale" id="cp-initiale" aria-hidden="true">C</span>
+            <div>
+              <p class="cp-menu__bonjour">Bonjour</p>
+              <p class="cp-menu__email" id="cp-email"></p>
+            </div>
+          </div>
+          <p class="cp-menu__compteur"><strong id="cp-nb-billets">0 billet</strong><span>dans ton espace</span></p>
+          <button type="button" class="cp-menu__bascule" id="cp-bascule" aria-expanded="false" aria-controls="cp-nav">Menu du compte</button>
+          <nav class="cp-menu__nav" id="cp-nav">
+            <p class="cp-menu__titre">Mon compte</p>
+            <ul>
+              <li><a href="#accueil" data-cp="accueil">Accueil</a></li>
+              <li><a href="#billets" data-cp="billets">Mes billets</a></li>
+              <li><a href="#commandes" data-cp="commandes">Mes commandes</a></li>
+              <li><a href="#informations" data-cp="informations">Mes informations</a></li>
+            </ul>
+            <p class="cp-menu__titre">Gérer mes billets</p>
+            <ul>
+              <li><a href="#telecharger" data-cp="telecharger">Télécharger mon billet</a></li>
+              <li><a href="#modifier" data-cp="modifier">Modifier une réservation</a></li>
+              <li><a href="#annuler" data-cp="annuler">Annuler / remboursement</a></li>
+              <li><a href="#renvoi" data-cp="renvoi">Billet non reçu</a></li>
+            </ul>
+            <p class="cp-menu__titre">Aide</p>
+            <ul>
+              <li><a href="#aide" data-cp="aide">Centre d’aide / FAQ</a></li>
+              <li><a href="#contact" data-cp="contact">Contacter le service client</a></li>
+              <li><a href="#demandes" data-cp="demandes">Suivre ma demande</a></li>
+            </ul>
+            <p class="cp-menu__titre">Paramètres</p>
+            <ul>
+              <li><a href="#securite" data-cp="securite">Sécurité &amp; code d’accès</a></li>
+            </ul>
+            <button type="button" class="cp-menu__sortir" id="cp-logout">Déconnexion</button>
+          </nav>
+        </aside>
+        <div class="cp-corps" id="cp-corps"></div>
+      </div>
     </div>
   </main>
   <div id="chrome-bottom"></div>
@@ -47,7 +85,8 @@
   <script src="data.js?v=56"></script>
   <script src="qrcode.js?v=1"></script>
   <script src="tickets.js?v=10"></script>
-  <script src="orders-ui.js?v=8"></script>
+  <script src="compte-ui.js?v=1"></script>
+  <script src="orders-ui.js?v=9"></script>
   <script src="chrome.js?v=3"></script>
 </body>
 </html>
