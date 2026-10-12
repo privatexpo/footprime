@@ -40,6 +40,8 @@ function invoiceLetter(order) {
     body: `
       <p>${esc(t("mail.hello", { name: order.name }))}</p>
       <p>${esc(t("mail.invoiceLead"))}</p>
+      <p class="mail-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.code || order.ref)}</strong></p>
+      <p class="mail-code__help">${esc(t("mail.codeHelp"))}</p>
       <dl class="mail-meta">
         <div><dt>${esc(t("mail.ref"))}</dt><dd>${esc(order.ref)}</dd></div>
         <div><dt>${esc(t("mail.date"))}</dt><dd>${esc(mailWhen(order.created))}</dd></div>
@@ -54,11 +56,6 @@ function invoiceLetter(order) {
 }
 
 function ticketsLetter(order) {
-  const sheets = order.items
-    .map((item) => item.tickets.map((ticket) => pdfSheet(order, item, ticket)).join(""))
-    .join("");
-  const count = order.items.reduce((sum, item) => sum + item.tickets.length, 0);
-  const attached = count > 1 ? t("mail.attached", { n: count }) : t("mail.attachedOne");
   return letterShell({
     from: "support@primeleaguepass.com",
     subject: `${t("mail.ticketsKicker")} ${order.ref}`,
@@ -70,8 +67,8 @@ function ticketsLetter(order) {
       <p>${esc(t("mail.ticketsLead"))}</p>
       <p class="mail-code"><span>${esc(t("order.mailCode"))}</span><strong>${esc(order.code || order.ref)}</strong></p>
       <p class="mail-code__help">${esc(t("mail.codeHelp"))}</p>
-      <p class="mail-files">${esc(attached)}</p>
-      <div class="pdf-stack">${sheets}</div>`,
+      <p class="mail-files">${esc(t("mail.attachedOne"))}</p>
+      <p><a href="billets.html">${esc(t("footer.tickets"))}</a></p>`,
   });
 }
 

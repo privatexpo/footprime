@@ -774,6 +774,20 @@ function quand(item) {
   return item.kickoff ? `${item.date} · ${item.kickoff}` : item.date || "";
 }
 
+function blocMesBillets(order) {
+  const url = `${SITE}/billets.html`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#140018" style="background:#140018;border-radius:14px;margin:0 0 16px;">
+      <tr><td style="padding:16px;">
+        <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">TES BILLETS SONT SUR MES BILLETS</p>
+        <p style="margin:8px 0 0;color:#ffffff;font-size:15px;line-height:1.45;">Connecte-toi avec l'e-mail de la commande et ce code.</p>
+        <p style="margin:10px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:3px;font-family:Menlo,Consolas,monospace;">${esc(order.code)}</p>
+        <p style="margin:14px 0 0;text-align:center;">
+          <a href="${esc(url)}" style="display:inline-block;background:#e10600;color:#ffffff;font-size:14px;font-weight:800;text-decoration:none;padding:10px 16px;border-radius:8px;">Ouvrir Mes billets</a>
+        </p>
+      </td></tr>
+    </table>`;
+}
+
 export function htmlFacture(order) {
   const lignes = order.items
     .map((item) => {
@@ -790,9 +804,10 @@ export function htmlFacture(order) {
     .join("");
   return coquille({
     kicker: "FACTURE",
-    title: "Ta facture",
+    title: "Paiement confirmé",
     body: `<p style="margin:0 0 12px;line-height:1.5;">${bonjour(order)}</p>
-      <p style="margin:0 0 16px;line-height:1.5;">Le paiement est confirmé. Le récapitulatif est ci-dessous. Tes e-billets partent dans un second e-mail.</p>
+      <p style="margin:0 0 16px;line-height:1.5;">Le paiement est confirmé. Tes billets sont sur Mes billets. Le code d'accès est ci-dessous.</p>
+      ${blocMesBillets(order)}
       ${puce("N° DE FACTURE", order.ref)}
       ${puce("DATE", dateLongue(order.created) || "—")}
       ${puce("STATUT", "Payée")}
@@ -840,49 +855,27 @@ function ficheBillet(order, item, ticket) {
 }
 
 export function htmlBillets(order) {
-  const count = order.items.reduce((sum, item) => sum + (item.tickets || []).length, 0);
-  const joints = count > 1 ? `${count} PDF joints` : "1 PDF joint";
   const lead = order.test
-    ? "Voici ton code et ton e-billet en PDF. Billet de test : aucune place n'est vendue."
-    : "Voici ton code et tes e-billets en PDF. Présente chaque QR code à l'entrée du stade.";
-  const fiches = [];
-  for (const item of order.items) {
-    for (const ticket of item.tickets || []) fiches.push(ficheBillet(order, item, ticket));
-  }
+    ? "Tes billets sont sur Mes billets. Billet de test : aucune place n'est vendue."
+    : "Tes billets sont sur Mes billets. Présente chaque QR code à l'entrée du stade.";
   return coquille({
-    kicker: "E-BILLETS",
-    title: "Tes e-billets",
+    kicker: "MES BILLETS",
+    title: "Tes billets sont sur Mes billets",
     body: `<p style="margin:0 0 12px;line-height:1.5;">${bonjour(order)}</p>
       <p style="margin:0 0 16px;line-height:1.5;">${lead}</p>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#140018" style="background:#140018;border-radius:14px;">
-        <tr><td style="padding:14px 16px;">
-          <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">CODE ENVOYÉ PAR E-MAIL</p>
-          <p style="margin:4px 0 0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:3px;font-family:Menlo,Consolas,monospace;">${esc(order.code)}</p>
-        </td></tr>
-      </table>
-      <p style="margin:10px 0 0;color:#4b5563;font-size:15px;line-height:1.45;">Avec l'e-mail de cette commande, ce code est le seul moyen de retrouver tes billets.</p>
-      <p style="margin:12px 0 0;color:#37003c;font-size:16px;font-weight:800;">${joints}</p>
-      ${fiches.join("")}`,
+      ${blocMesBillets(order)}
+      <p style="margin:0;color:#4b5563;font-size:15px;line-height:1.45;">Avec l'e-mail de cette commande et ce code, ouvre Mes billets pour voir tes QR.</p>`,
   });
 }
 
 async function envoyerMails(order) {
-  const billets = dossierBillets(order);
   const from = env("MAIL_FROM") || "Prime Football <support@primeleaguepass.com>";
   await envoyerBrevo({
     to: order.email,
     from,
-    subject: `Facture ${order.ref}`,
+    subject: `Confirmation ${order.ref} — tes billets sont sur Mes billets`,
     html: htmlFacture(order),
     key: `pf-${order.wooId}-facture`,
-  });
-  await envoyerBrevo({
-    to: order.email,
-    from,
-    subject: `E-billets ${order.ref}`,
-    html: htmlBillets(order),
-    attachment: billets,
-    key: `pf-${order.wooId}-billets`,
   });
 }
 
