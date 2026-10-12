@@ -55,14 +55,21 @@
     return d.toLocaleDateString("fr-FR");
   }
 
-  async function api(body) {
-    const res = await fetch("/api/billets", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return res.json().catch(() => ({}));
+  async function api(body, timeoutMs = 20000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch("/api/billets", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ctrl.signal,
+      });
+      return await res.json().catch(() => ({}));
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   function appliquerResume(payload) {
@@ -513,7 +520,10 @@
 
   async function chargerSession() {
     try {
-      const res = await fetch("/api/billets", { credentials: "same-origin" });
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
+      const res = await fetch("/api/billets", { credentials: "same-origin", signal: ctrl.signal });
+      clearTimeout(timer);
       const payload = await res.json().catch(() => ({}));
       if (payload.ok && payload.email) {
         appliquerResume(payload);
@@ -531,6 +541,12 @@
     const data = new FormData(form);
     const email = String(data.get("email") || "").trim();
     const code = String(data.get("code") || "").trim();
+    const btn = form.querySelector('button[type="submit"]');
+    const prev = btn ? btn.textContent : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Connexion…";
+    }
     try {
       const payload = await api({ email, code });
       if (payload.pending) {
@@ -545,6 +561,11 @@
       }
     } catch {
       /* local */
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = prev || "Se connecter";
+      }
     }
     if (typeof findByMailAndCode === "function") {
       const found = findByMailAndCode(email, code);
