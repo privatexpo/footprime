@@ -4817,7 +4817,7 @@ body:not([data-competition]) .page-header__photo--pl {
 .cp-menu__sortir {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   width: 100%;
   text-align: left;
   background: none;
@@ -4827,8 +4827,25 @@ body:not([data-competition]) .page-header__photo--pl {
   color: #1c2230;
   font: inherit;
   font-size: 0.9rem;
+  line-height: 1.3;
   text-decoration: none;
   cursor: pointer;
+}
+
+.cp-menu a span,
+.cp-menu__sortir span {
+  min-width: 0;
+}
+
+.cp-menu__icone {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .cp-menu a:hover,
