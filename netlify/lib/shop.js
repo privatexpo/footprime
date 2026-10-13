@@ -1259,6 +1259,7 @@ function blocMesBillets(order) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#140018" style="background:#140018;border-radius:14px;margin:0 0 16px;">
       <tr><td style="padding:16px;">
         <p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;letter-spacing:1px;">ESPACE CLIENT</p>
+        <p style="margin:8px 0 0;color:rgba(255,255,255,.75);font-size:13px;line-height:1.4;">Les e-billets PDF sont aussi joints à cet e-mail.</p>
         ${code}
         <p style="margin:14px 0 0;text-align:center;">
           <a href="${esc(url)}" style="display:inline-block;background:#e10600;color:#ffffff;font-size:14px;font-weight:800;text-decoration:none;padding:10px 16px;border-radius:8px;">Ouvrir mon espace client</a>
@@ -1349,12 +1350,14 @@ export function htmlBillets(order) {
 
 async function envoyerMails(order) {
   const from = env("MAIL_FROM") || "Prime Football <support@primeleaguepass.com>";
+  const attachment = dossierBillets(order);
   await envoyerBrevo({
     to: order.email,
     from,
     subject: `Confirmation ${order.ref} — tes billets sont dans ton espace client`,
     html: htmlFacture(order),
     key: `pf-${order.wooId}-facture`,
+    ...(attachment.length ? { attachment } : {}),
   });
 }
 
